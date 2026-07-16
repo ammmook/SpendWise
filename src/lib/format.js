@@ -72,3 +72,27 @@ export function todayISO(date = new Date()) {
   const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
+
+/** แสดงเวลาจาก ISO datetime -> "14:35" (24 ชม.) */
+export function formatTime(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
+/** ย่อจำนวนเงินสำหรับช่องปฏิทิน เช่น 1234 -> "1.2k", 980 -> "980" */
+export function formatCompact(n) {
+  const v = Math.round(Number(n) || 0)
+  if (v >= 1000) return `${(v / 1000).toFixed(v >= 100000 ? 0 : 1).replace(/\.0$/, '')}k`
+  return String(v)
+}
+
+/** "5 ก.ค. 2569" แบบเต็มพร้อมชื่อวัน "วันเสาร์ที่ 5 ก.ค. 2569" */
+export function formatDateLong(isoDate) {
+  if (!isoDate) return ''
+  const d = new Date(`${isoDate}T00:00:00`)
+  if (Number.isNaN(d.getTime())) return isoDate
+  const days = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์']
+  return `${days[d.getDay()]}ที่ ${formatDate(isoDate)}`
+}

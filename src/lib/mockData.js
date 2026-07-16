@@ -48,6 +48,10 @@ function randBetween(min, max) {
   return Math.round((min + Math.random() * (max - min)) / 5) * 5
 }
 
+// สร้าง created_at ให้มีเวลาในวัน เพื่อให้แท็บ Daily เรียงตามเวลา + แสดงเวลาได้
+const withTime = (dateStr, hour) =>
+  `${dateStr}T${String(hour).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}:00`
+
 function buildTransactions() {
   const txns = []
   const now = new Date()
@@ -71,6 +75,7 @@ function buildTransactions() {
       amount: BASE_SALARY,
       description: 'เงินเดือน',
       transaction_date: dayISO(1),
+      created_at: withTime(dayISO(1), 9),
       source: 'salary_sync',
       ai_categorized: false,
     })
@@ -84,6 +89,7 @@ function buildTransactions() {
         amount: randBetween(1500, 4500),
         description: 'ค่าล่วงเวลา',
         transaction_date: dayISO(20),
+        created_at: withTime(dayISO(20), 18),
         source: 'manual',
         ai_categorized: false,
       })
@@ -94,13 +100,15 @@ function buildTransactions() {
       const count = back === 0 ? Math.ceil((t.perMonth * maxDay) / daysInMonth) : t.perMonth
       for (let i = 0; i < count; i++) {
         const day = 1 + Math.floor(Math.random() * maxDay)
+        const dateStr = dayISO(day)
         txns.push({
           id: uid(),
           category_id: catByName(t.cat).id,
           type: 'expense',
           amount: randBetween(t.min, t.max),
           description: t.desc,
-          transaction_date: dayISO(day),
+          transaction_date: dateStr,
+          created_at: withTime(dateStr, 7 + Math.floor(Math.random() * 14)),
           source: 'manual',
           ai_categorized: Math.random() > 0.7,
         })

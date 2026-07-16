@@ -6,7 +6,9 @@ import {
 } from 'lucide-react'
 import { getGoals, addGoal, deleteGoal, aiGoalPlan } from '../lib/api'
 import { formatMoney, formatDate } from '../lib/format'
-import { Button, Card, Field, Input, Modal, LoadingBlock, EmptyState } from '../components/ui'
+import {
+  Button, Card, Eyebrow, Field, Input, Modal, Skeleton, EmptyState,
+} from '../components/ui'
 
 export default function Goals() {
   const qc = useQueryClient()
@@ -16,10 +18,11 @@ export default function Goals() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-ink-900">เป้าหมายการออม</h2>
-          <p className="text-sm text-ink-500">ตั้งเป้าและให้ AI ช่วยวางแผนให้ถึงเป้าหมาย</p>
+          <Eyebrow>Goals</Eyebrow>
+          <h2 className="display mt-1 text-2xl text-ink">เป้าหมายการออม</h2>
+          <p className="mt-1 text-sm text-muted">ตั้งเป้าและให้ AI ช่วยวางแผนให้ถึงเป้าหมาย</p>
         </div>
         <Button onClick={() => setAdding(true)}>
           <Plus className="h-4 w-4" /> เพิ่มเป้าหมาย
@@ -27,7 +30,11 @@ export default function Goals() {
       </div>
 
       {isLoading ? (
-        <LoadingBlock />
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-64 rounded-3xl" />
+          ))}
+        </div>
       ) : goals.length === 0 ? (
         <Card>
           <EmptyState
@@ -73,16 +80,16 @@ function GoalCard({ goal, onChanged }) {
   const plan = goal.ai_plan
 
   return (
-    <Card className="flex flex-col p-5">
+    <Card interactive className="flex flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lilac text-ink">
             <Target className="h-5 w-5" />
           </span>
           <div>
-            <h3 className="font-semibold text-ink-900">{goal.name}</h3>
+            <h3 className="font-semibold text-ink">{goal.name}</h3>
             {goal.target_date && (
-              <p className="text-xs text-ink-400">ถึงกำหนด {formatDate(goal.target_date)}</p>
+              <p className="text-xs text-muted">ถึงกำหนด {formatDate(goal.target_date)}</p>
             )}
           </div>
         </div>
@@ -93,13 +100,13 @@ function GoalCard({ goal, onChanged }) {
                 await deleteGoal(goal.id)
                 onChanged()
               }}
-              className="rounded-lg bg-rose-50 px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-100"
+              className="rounded-full bg-[#fbeeee] px-3 py-1 text-xs font-medium text-[#e34948] hover:bg-[#f7dede]"
             >
               ลบ
             </button>
             <button
               onClick={() => setConfirming(false)}
-              className="rounded-lg px-2 py-1 text-xs text-ink-400"
+              className="rounded-full px-2 py-1 text-xs text-muted hover:text-ink"
             >
               ยกเลิก
             </button>
@@ -107,7 +114,7 @@ function GoalCard({ goal, onChanged }) {
         ) : (
           <button
             onClick={() => setConfirming(true)}
-            className="rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-600"
+            className="rounded-full p-1.5 text-muted hover:bg-[#fbeeee] hover:text-[#e34948]"
             aria-label="ลบเป้าหมาย"
           >
             <Trash2 className="h-4 w-4" />
@@ -116,24 +123,21 @@ function GoalCard({ goal, onChanged }) {
       </div>
 
       {/* Progress */}
-      <div className="mt-4">
+      <div className="mt-5">
         <div className="mb-1.5 flex items-baseline justify-between text-sm">
-          <span className="font-semibold tabular text-ink-900">{formatMoney(goal.saved_amount)}</span>
-          <span className="text-ink-400 tabular">/ {formatMoney(goal.target_amount)}</span>
+          <span className="font-semibold tabular text-ink">{formatMoney(goal.saved_amount)}</span>
+          <span className="text-muted tabular">/ {formatMoney(goal.target_amount)}</span>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-ink-100">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all"
-            style={{ width: `${pct}%` }}
-          />
+        <div className="h-2.5 overflow-hidden rounded-full bg-hairline-soft">
+          <div className="h-full rounded-full bg-ink transition-all" style={{ width: `${pct}%` }} />
         </div>
-        <p className="mt-1.5 text-xs text-ink-500">
+        <p className="mt-1.5 text-xs text-muted">
           ออมแล้ว {pct}% · เหลืออีก {formatMoney(goal.target_amount - goal.saved_amount)}
         </p>
       </div>
 
       {/* AI plan */}
-      <div className="mt-4 border-t border-ink-100 pt-4">
+      <div className="mt-5 border-t border-hairline-soft pt-5">
         {!plan ? (
           <Button
             variant="secondary"
@@ -141,13 +145,14 @@ function GoalCard({ goal, onChanged }) {
             onClick={() => planMutation.mutate()}
             loading={planMutation.isPending}
           >
-            <Sparkles className="h-4 w-4 text-violet-500" />
+            <Sparkles className="h-4 w-4" />
             {planMutation.isPending ? 'AI กำลังวางแผน...' : 'ให้ AI วางแผนออม'}
           </Button>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-violet-600">
-              <Sparkles className="h-4 w-4" /> แผนจาก AI
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              <p className="eyebrow">AI Plan</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <PlanStat icon={Coins} label="ต้องออม/เดือน" value={formatMoney(plan.required_monthly)} />
@@ -157,27 +162,23 @@ function GoalCard({ goal, onChanged }) {
             </div>
 
             {plan.cut_suggestions?.length > 0 && (
-              <div className="rounded-xl bg-ink-50 p-3">
-                <p className="mb-2 text-xs font-medium text-ink-600">แนะนำให้ลดค่าใช้จ่าย</p>
+              <div className="rounded-2xl bg-surface p-3">
+                <p className="mb-2 text-xs font-medium text-muted">แนะนำให้ลดค่าใช้จ่าย</p>
                 <ul className="space-y-1.5">
                   {plan.cut_suggestions.map((c) => (
                     <li key={c.category} className="flex items-center justify-between text-sm">
-                      <span className="text-ink-600">{c.category}</span>
-                      <span className="tabular text-rose-600">
-                        ลด {formatMoney(c.suggested_cut)}
-                      </span>
+                      <span className="text-ink">{c.category}</span>
+                      <span className="tabular text-ink">ลด {formatMoney(c.suggested_cut)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            <p className="rounded-xl bg-violet-50 p-3 text-sm leading-relaxed text-violet-900">
-              {plan.advice_th}
-            </p>
+            <p className="rounded-2xl bg-lilac p-4 text-sm leading-relaxed text-ink">{plan.advice_th}</p>
             <button
               onClick={() => planMutation.mutate()}
-              className="text-xs font-medium text-violet-500 hover:text-violet-700"
+              className="text-xs font-medium text-ink underline underline-offset-2 hover:text-muted"
             >
               วางแผนใหม่อีกครั้ง
             </button>
@@ -190,12 +191,12 @@ function GoalCard({ goal, onChanged }) {
 
 function PlanStat({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-xl border border-ink-100 p-2.5">
-      <div className="flex items-center gap-1.5 text-ink-400">
+    <div className="rounded-2xl border border-hairline p-3">
+      <div className="flex items-center gap-1.5 text-muted">
         <Icon className="h-3.5 w-3.5" />
         <span className="text-[11px]">{label}</span>
       </div>
-      <p className="mt-0.5 text-sm font-semibold tabular text-ink-900">{value}</p>
+      <p className="mt-0.5 text-sm font-semibold tabular text-ink">{value}</p>
     </div>
   )
 }
@@ -274,7 +275,7 @@ function GoalModal({ onClose, onSaved }) {
             onChange={(e) => setForm((f) => ({ ...f, target_date: e.target.value }))}
           />
         </Field>
-        {error && <p className="text-sm text-rose-500">{error}</p>}
+        {error && <p className="text-sm font-medium text-[#e34948]">{error}</p>}
       </form>
     </Modal>
   )

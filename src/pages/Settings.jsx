@@ -4,14 +4,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Plus, Trash2, Tag } from 'lucide-react'
 import { getMe, updateMe, getCategories, addCategory, deleteCategory } from '../lib/api'
 import { formatMoney } from '../lib/format'
-import { Button, Card, Field, Input, Select, CategoryIcon, LoadingBlock } from '../components/ui'
+import { Button, Card, Eyebrow, Field, Input, Select, CategoryIcon, Skeleton } from '../components/ui'
 
 export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-ink-900">ตั้งค่า</h2>
-        <p className="text-sm text-ink-500">จัดการโปรไฟล์และหมวดหมู่ของคุณ</p>
+        <Eyebrow>Settings</Eyebrow>
+        <h2 className="display mt-1 text-2xl text-ink">ตั้งค่า</h2>
+        <p className="mt-1 text-sm text-muted">จัดการโปรไฟล์และหมวดหมู่ของคุณ</p>
       </div>
       <ProfileSection />
       <CategoriesSection />
@@ -25,7 +26,6 @@ function ProfileSection() {
   const [form, setForm] = useState(null)
   const [saved, setSaved] = useState(false)
 
-  // sync ค่าเริ่มต้นเมื่อโหลดเสร็จ
   const current = form ?? (me ? { display_name: me.display_name, base_salary: me.base_salary } : null)
 
   const mutation = useMutation({
@@ -43,18 +43,21 @@ function ProfileSection() {
 
   if (isLoading || !current) {
     return (
-      <Card className="p-5">
-        <LoadingBlock label="กำลังโหลดโปรไฟล์..." />
+      <Card className="p-6">
+        <Skeleton className="h-5 w-28 rounded" />
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Skeleton className="h-11 rounded-lg" />
+          <Skeleton className="h-11 rounded-lg" />
+        </div>
+        <Skeleton className="mt-5 h-11 w-40 rounded-full" />
       </Card>
     )
   }
 
   return (
-    <Card className="p-5">
-      <h3 className="font-semibold text-ink-900">โปรไฟล์</h3>
-      <p className="text-sm text-ink-500">
-        ฐานเงินเดือนใช้สำหรับให้ AI คำนวณแผนการออมและ OT
-      </p>
+    <Card className="p-6">
+      <h3 className="display text-lg text-ink">โปรไฟล์</h3>
+      <p className="mt-1 text-sm text-muted">ฐานเงินเดือนใช้สำหรับให้ AI คำนวณแผนการออมและ OT</p>
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="ชื่อที่แสดง">
           <Input
@@ -71,12 +74,12 @@ function ProfileSection() {
           />
         </Field>
       </div>
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-5 flex items-center gap-3">
         <Button onClick={() => mutation.mutate()} loading={mutation.isPending}>
           บันทึกโปรไฟล์
         </Button>
         {saved && (
-          <span className="flex items-center gap-1 text-sm text-brand-600">
+          <span className="flex items-center gap-1 text-sm font-medium text-[#1ea64a]">
             <Check className="h-4 w-4" /> บันทึกแล้ว
           </span>
         )}
@@ -115,11 +118,10 @@ function CategoriesSection() {
   const defaults = categories.filter((c) => c.is_default)
 
   return (
-    <Card className="p-5">
-      <h3 className="font-semibold text-ink-900">หมวดหมู่</h3>
-      <p className="text-sm text-ink-500">เพิ่มหมวดหมู่ของคุณเอง (หมวดเริ่มต้นแก้ไขไม่ได้)</p>
+    <Card className="p-6">
+      <h3 className="display text-lg text-ink">หมวดหมู่</h3>
+      <p className="mt-1 text-sm text-muted">เพิ่มหมวดหมู่ของคุณเอง (หมวดเริ่มต้นแก้ไขไม่ได้)</p>
 
-      {/* Add form */}
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -146,28 +148,23 @@ function CategoriesSection() {
           <Plus className="h-4 w-4" /> เพิ่ม
         </Button>
       </form>
-      {error && <p className="mt-2 text-sm text-rose-500">{error}</p>}
+      {error && <p className="mt-2 text-sm font-medium text-[#e34948]">{error}</p>}
 
-      {/* Custom categories */}
       {custom.length > 0 && (
-        <div className="mt-5">
-          <p className="mb-2 text-xs font-medium text-ink-500">หมวดที่สร้างเอง</p>
+        <div className="mt-6">
+          <p className="eyebrow mb-2">Custom</p>
           <ul className="flex flex-wrap gap-2">
             {custom.map((c) => (
               <li
                 key={c.id}
-                className="inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white py-1 pl-3 pr-1.5 text-sm"
+                className="inline-flex items-center gap-2 rounded-full border border-hairline bg-canvas py-1 pl-3 pr-1.5 text-sm"
               >
-                <Tag className="h-3.5 w-3.5 text-ink-400" />
-                <span className="text-ink-700">{c.name_th}</span>
-                <span
-                  className={`text-[10px] ${c.type === 'income' ? 'text-brand-500' : 'text-rose-500'}`}
-                >
-                  {c.type === 'income' ? 'รับ' : 'จ่าย'}
-                </span>
+                <Tag className="h-3.5 w-3.5 text-muted" />
+                <span className="text-ink">{c.name_th}</span>
+                <span className="text-[10px] text-muted">{c.type === 'income' ? 'รับ' : 'จ่าย'}</span>
                 <button
                   onClick={() => delMutation.mutate(c.id)}
-                  className="rounded-full p-1 text-ink-400 hover:bg-rose-50 hover:text-rose-600"
+                  className="rounded-full p-1 text-muted hover:bg-[#fbeeee] hover:text-[#e34948]"
                   aria-label={`ลบ ${c.name_th}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -178,17 +175,20 @@ function CategoriesSection() {
         </div>
       )}
 
-      {/* Default categories */}
-      <div className="mt-5">
-        <p className="mb-2 text-xs font-medium text-ink-500">หมวดเริ่มต้น</p>
+      <div className="mt-6">
+        <p className="eyebrow mb-2">Default</p>
         {isLoading ? (
-          <LoadingBlock label="กำลังโหลด..." />
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-24 rounded-full" />
+            ))}
+          </div>
         ) : (
           <ul className="flex flex-wrap gap-2">
             {defaults.map((c) => (
               <li
                 key={c.id}
-                className="inline-flex items-center gap-1.5 rounded-full bg-ink-100 px-3 py-1 text-sm text-ink-600"
+                className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-sm text-ink"
               >
                 <CategoryIcon name={c.icon} className="h-3.5 w-3.5" />
                 {c.name_th}

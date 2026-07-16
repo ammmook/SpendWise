@@ -108,6 +108,7 @@ export async function addTransaction(input) {
     amount: Number(input.amount),
     description: input.description?.trim() || '',
     transaction_date: input.transaction_date || todayISO(),
+    created_at: new Date().toISOString(),
     source: 'manual',
     ai_categorized: !!input.ai_categorized,
   }
@@ -175,9 +176,40 @@ export async function getDashboardSummary({ month } = {}) {
     income,
     expense,
     balance: income - expense,
+    tx_count: inMonth.length,
     breakdown,
     trend,
     recent,
+  }
+}
+
+// สรุปรายปี (12 เดือน) สำหรับหน้า Dashboard analytics
+export async function getYearlySummary({ year } = {}) {
+  await delay(320)
+  const y = year || new Date().getFullYear()
+  const months = []
+  let income = 0
+  let expense = 0
+  for (let mm = 1; mm <= 12; mm++) {
+    const key = `${y}-${String(mm).padStart(2, '0')}`
+    const rows = db.transactions.filter((t) => monthOf(t.transaction_date) === key)
+    const inc = rows.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+    const exp = rows.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+    months.push({ month: key, income: inc, expense: exp, balance: inc - exp })
+    income += inc
+    expense += exp
+  }
+  const activeMonths = months.filter((mo) => mo.income > 0 || mo.expense > 0).length || 1
+  const best = [...months].sort((a, b) => b.balance - a.balance)[0]
+  return {
+    year: y,
+    months,
+    income,
+    expense,
+    balance: income - expense,
+    avg_expense: Math.round(expense / activeMonths),
+    avg_income: Math.round(income / activeMonths),
+    best_month: best,
   }
 }
 

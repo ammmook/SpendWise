@@ -1,8 +1,8 @@
-// หน้า Login / Register (mock auth) — Phase ถัดไปต่อ supabase-js
+// หน้า Login / Register — editorial ขาว-ดำ + color block ตาม DESIGN.md
 import { useState } from 'react'
-import { PiggyBank, Sparkles, TrendingUp, Target } from 'lucide-react'
+import { PiggyBank, Check } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { Button, Field, Input } from '../components/ui'
+import { Button, Field, Input, Eyebrow } from '../components/ui'
 
 export default function Login() {
   const { signIn, signUp } = useAuth()
@@ -30,7 +30,6 @@ export default function Login() {
     try {
       if (mode === 'login') await signIn({ email: form.email })
       else await signUp({ email: form.email, displayName: form.displayName })
-      // เมื่อ user ถูกตั้งค่า RequireAuth จะพาไป dashboard เอง
     } catch {
       setErrors({ form: 'เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง' })
     } finally {
@@ -39,60 +38,63 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Brand panel — desktop */}
-      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-brand-700 p-12 text-white lg:flex">
-        <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-brand-500/40 blur-3xl" />
-        <div className="absolute -bottom-20 -left-10 h-72 w-72 rounded-full bg-brand-400/30 blur-3xl" />
-        <div className="relative flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
+    <div className="flex min-h-screen bg-canvas p-3 sm:p-4">
+      {/* Color-block panel — desktop */}
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden rounded-3xl bg-lilac p-12 text-ink lg:flex">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-canvas">
             <PiggyBank className="h-6 w-6" />
           </div>
-          <span className="text-xl font-bold">SpendWise</span>
+          <span className="text-xl font-bold tracking-tight">SpendWise</span>
         </div>
-        <div className="relative">
-          <h1 className="text-3xl font-bold leading-snug">
-            จัดการเงินให้ฉลาดขึ้น
+
+        <div>
+          <Eyebrow className="!text-ink/70">Personal Finance · AI</Eyebrow>
+          <h1 className="display mt-4 text-5xl">
+            จัดการเงิน
             <br />
-            ด้วยผู้ช่วย AI
+            ให้ฉลาดขึ้น
           </h1>
-          <p className="mt-4 max-w-sm text-brand-100">
+          <p className="mt-5 max-w-sm text-lg font-light leading-relaxed text-ink/80">
             บันทึกรายรับรายจ่าย ตั้งเป้าหมายการออม และให้ AI ช่วยวางแผนการเงินของคุณ
           </p>
-          <ul className="mt-8 space-y-3 text-sm">
+          <ul className="mt-8 border-t border-ink/15 text-[15px]">
             {[
-              { icon: Sparkles, text: 'จัดหมวดหมู่อัตโนมัติด้วย AI' },
-              { icon: Target, text: 'วางแผนออมเงินให้ถึงเป้าหมาย' },
-              { icon: TrendingUp, text: 'จำลองสถานการณ์ “ถ้า...จะเป็นอย่างไร”' },
-            ].map((f) => (
-              <li key={f.text} className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-                  <f.icon className="h-4 w-4" />
+              'จัดหมวดหมู่อัตโนมัติด้วย AI',
+              'วางแผนออมเงินให้ถึงเป้าหมาย',
+              'จำลองสถานการณ์ “ถ้า...จะเป็นอย่างไร”',
+            ].map((text, i) => (
+              <li
+                key={text}
+                className="flex items-baseline gap-4 border-b border-ink/15 py-3.5"
+              >
+                <span className="font-mono text-sm tabular text-ink/45">
+                  {String(i + 1).padStart(2, '0')}
                 </span>
-                {f.text}
+                <span>{text}</span>
               </li>
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-brand-200">
-          © {new Date().getFullYear()} SpendWise — Personal Finance
-        </p>
+
+        <p className="eyebrow !text-ink/50">© {new Date().getFullYear()} SpendWise</p>
       </div>
 
       {/* Form */}
-      <div className="flex w-full items-center justify-center bg-ink-50 p-6 lg:w-1/2">
+      <div className="flex w-full items-center justify-center px-4 py-10 lg:w-1/2">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-canvas">
               <PiggyBank className="h-6 w-6" />
             </div>
-            <span className="text-xl font-bold text-ink-900">SpendWise</span>
+            <span className="text-xl font-bold tracking-tight text-ink">SpendWise</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-ink-900">
+          <Eyebrow>{mode === 'login' ? 'Sign in' : 'Create account'}</Eyebrow>
+          <h2 className="display mt-2 text-3xl text-ink">
             {mode === 'login' ? 'ยินดีต้อนรับกลับ' : 'สร้างบัญชีใหม่'}
           </h2>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="mt-2 text-[15px] text-muted">
             {mode === 'login'
               ? 'เข้าสู่ระบบเพื่อจัดการการเงินของคุณ'
               : 'เริ่มต้นวางแผนการเงินได้ฟรีวันนี้'}
@@ -130,7 +132,7 @@ export default function Login() {
             </Field>
 
             {errors.form && (
-              <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">
+              <p className="rounded-lg bg-[#fbeeee] px-3 py-2 text-sm font-medium text-[#e34948]">
                 {errors.form}
               </p>
             )}
@@ -140,7 +142,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-ink-500">
+          <p className="mt-6 text-center text-sm text-muted">
             {mode === 'login' ? 'ยังไม่มีบัญชี?' : 'มีบัญชีอยู่แล้ว?'}{' '}
             <button
               type="button"
@@ -148,13 +150,14 @@ export default function Login() {
                 setMode(mode === 'login' ? 'register' : 'login')
                 setErrors({})
               }}
-              className="font-semibold text-brand-600 hover:text-brand-700"
+              className="font-semibold text-ink underline underline-offset-4 hover:text-ink/70"
             >
               {mode === 'login' ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'}
             </button>
           </p>
 
-          <p className="mt-6 rounded-lg bg-ink-100 px-3 py-2 text-center text-xs text-ink-400">
+          <p className="mt-6 flex items-center justify-center gap-1.5 rounded-lg bg-surface px-3 py-2 text-center text-xs text-muted">
+            <Check className="h-3.5 w-3.5 text-[#1ea64a]" />
             เดโม (Phase 1): กรอกอีเมลและรหัสผ่านใดก็ได้เพื่อเข้าใช้งาน
           </p>
         </div>

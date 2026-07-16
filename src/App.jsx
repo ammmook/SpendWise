@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext'
 import { Spinner } from './components/ui'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Goals from './pages/Goals'
@@ -12,7 +13,7 @@ import Settings from './pages/Settings'
 
 function FullScreenLoader() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ink-100">
+    <div className="flex min-h-screen items-center justify-center bg-surface">
       <Spinner className="h-8 w-8" />
     </div>
   )
@@ -51,7 +52,8 @@ export default function App() {
             </RequireAuth>
           }
         >
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/what-if" element={<WhatIf />} />

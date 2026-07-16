@@ -1,36 +1,26 @@
-// โครงหน้าหลัก: sidebar (desktop) + bottom nav (mobile) + topbar
+// โครงหน้าหลัก: sidebar (desktop) + bottom nav (mobile) — สไตล์ขาว-ดำ ตาม DESIGN.md
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard, ArrowLeftRight, Target, Sparkles, Settings, LogOut, PiggyBank,
+  Home, LayoutDashboard, ArrowLeftRight, Target, Sparkles, Settings, LogOut, PiggyBank,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const NAV = [
-  { to: '/', label: 'ภาพรวม', icon: LayoutDashboard, end: true },
-  { to: '/transactions', label: 'รายการ', icon: ArrowLeftRight },
-  { to: '/goals', label: 'เป้าหมาย', icon: Target },
-  { to: '/what-if', label: 'จำลอง', icon: Sparkles },
-  { to: '/settings', label: 'ตั้งค่า', icon: Settings },
+  { to: '/', label: 'หน้าแรก', eyebrow: 'HOME', icon: Home, end: true },
+  { to: '/dashboard', label: 'วิเคราะห์', eyebrow: 'DASHBOARD', icon: LayoutDashboard },
+  { to: '/transactions', label: 'รายการ', eyebrow: 'TRANSACTIONS', icon: ArrowLeftRight },
+  { to: '/goals', label: 'เป้าหมาย', eyebrow: 'GOALS', icon: Target },
+  { to: '/what-if', label: 'จำลอง', eyebrow: 'SIMULATION', icon: Sparkles },
+  { to: '/settings', label: 'ตั้งค่า', eyebrow: 'SETTINGS', icon: Settings },
 ]
-
-const PAGE_TITLES = {
-  '/': 'ภาพรวมการเงิน',
-  '/transactions': 'รายการรับ-จ่าย',
-  '/goals': 'เป้าหมายการออม',
-  '/what-if': 'จำลองสถานการณ์',
-  '/settings': 'ตั้งค่า',
-}
 
 function Brand() {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-canvas">
         <PiggyBank className="h-5 w-5" strokeWidth={2} />
       </div>
-      <div className="leading-tight">
-        <p className="font-bold text-ink-900">SpendWise</p>
-        <p className="text-[11px] text-ink-400">การเงินฉลาดขึ้นด้วย AI</p>
-      </div>
+      <span className="text-lg font-bold tracking-tight text-ink">SpendWise</span>
     </div>
   )
 }
@@ -38,51 +28,54 @@ function Brand() {
 export default function Layout() {
   const { user, signOut } = useAuth()
   const { pathname } = useLocation()
-  const title = PAGE_TITLES[pathname] || 'SpendWise'
+  const current = NAV.find((n) => (n.end ? pathname === n.to : pathname.startsWith(n.to))) || NAV[0]
 
   return (
-    <div className="min-h-screen bg-ink-100">
+    <div className="min-h-screen bg-surface">
       {/* Sidebar — desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-ink-200 bg-white px-4 py-6 lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-hairline bg-canvas px-4 py-6 lg:flex">
         <div className="px-2">
           <Brand />
         </div>
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
+        <nav className="mt-10 flex flex-1 flex-col gap-1.5">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                `group flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-200 ease-out ${
                   isActive
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-ink-500 hover:bg-ink-100 hover:text-ink-800'
+                    ? 'bg-ink text-canvas'
+                    : 'text-ink hover:bg-surface'
                 }`
               }
             >
-              <item.icon className="h-5 w-5" strokeWidth={1.9} />
+              <item.icon
+                className="h-[18px] w-[18px] transition-transform duration-200 ease-out group-hover:scale-110"
+                strokeWidth={1.9}
+              />
               {item.label}
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-ink-100 pt-4">
+        <div className="border-t border-hairline-soft pt-4">
           <div className="mb-3 flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-surface text-sm font-semibold text-ink">
               {(user?.display_name?.[0] || 'U').toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-ink-800">
+              <p className="truncate text-sm font-medium text-ink">
                 {user?.display_name || 'ผู้ใช้'}
               </p>
-              <p className="truncate text-xs text-ink-400">{user?.email}</p>
+              <p className="truncate text-xs text-muted">{user?.email}</p>
             </div>
           </div>
           <button
             onClick={signOut}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-500 transition hover:bg-rose-50 hover:text-rose-600"
+            className="flex w-full items-center gap-3 rounded-full px-4 py-2 text-sm font-medium text-ink transition hover:bg-surface"
           >
-            <LogOut className="h-5 w-5" strokeWidth={1.9} />
+            <LogOut className="h-[18px] w-[18px]" strokeWidth={1.9} />
             ออกจากระบบ
           </button>
         </div>
@@ -91,15 +84,18 @@ export default function Layout() {
       {/* Main */}
       <div className="lg:pl-64">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 border-b border-ink-200 bg-white/80 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/85 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
             <div className="lg:hidden">
               <Brand />
             </div>
-            <h1 className="hidden text-lg font-semibold text-ink-900 lg:block">{title}</h1>
+            <div className="hidden lg:block">
+              <p className="eyebrow">{current.eyebrow}</p>
+              <h1 className="display text-lg text-ink">{current.label}</h1>
+            </div>
             <button
               onClick={signOut}
-              className="rounded-lg p-2 text-ink-400 hover:bg-ink-100 hover:text-rose-600 lg:hidden"
+              className="rounded-full p-2 text-muted hover:bg-surface hover:text-ink lg:hidden"
               aria-label="ออกจากระบบ"
             >
               <LogOut className="h-5 w-5" />
@@ -107,27 +103,36 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:pb-10">
-          <Outlet />
+        <main className="mx-auto max-w-5xl px-4 pb-28 pt-8 sm:px-6 lg:pb-12">
+          {/* re-mount ต่อ route เพื่อ page transition (fade-up) */}
+          <div key={pathname} className="animate-fade-up">
+            <Outlet />
+          </div>
         </main>
       </div>
 
       {/* Bottom nav — mobile */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-ink-200 bg-white/95 backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-canvas/95 backdrop-blur lg:hidden">
+        <div className="grid grid-cols-6 px-1 py-1.5">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition ${
-                  isActive ? 'text-brand-600' : 'text-ink-400'
-                }`
-              }
+              className="flex flex-col items-center gap-1 py-1.5 text-[10px] font-medium text-ink"
             >
-              <item.icon className="h-5 w-5" strokeWidth={1.9} />
-              {item.label}
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition-[background-color,transform] duration-200 ease-out active:scale-90 ${
+                      isActive ? 'bg-ink text-canvas' : 'text-ink'
+                    }`}
+                  >
+                    <item.icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
+                  </span>
+                  <span className={isActive ? 'text-ink' : 'text-muted'}>{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </div>
