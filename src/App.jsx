@@ -6,7 +6,6 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
-import Transactions from './pages/Transactions'
 import Goals from './pages/Goals'
 import WhatIf from './pages/WhatIf'
 import Settings from './pages/Settings'
@@ -54,7 +53,6 @@ export default function App() {
         >
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/transactions" element={<Transactions />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/what-if" element={<WhatIf />} />
           <Route path="/settings" element={<Settings />} />

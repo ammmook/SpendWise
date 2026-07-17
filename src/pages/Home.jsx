@@ -6,6 +6,7 @@ import {
   Sparkles, Clock, ArrowUpRight, ArrowDownRight,
 } from 'lucide-react'
 import { getTransactions, getCategories, deleteTransaction } from '../lib/api'
+import { FUNDING_SOURCES } from '../lib/mockData'
 import { formatMoney, formatDateLong, formatTime, currentMonthKey, todayISO } from '../lib/format'
 import {
   Card, CategoryIcon, Badge, Button, Skeleton, EmptyState,
@@ -13,9 +14,20 @@ import {
 import MonthPicker from '../components/MonthPicker'
 import Calendar from '../components/Calendar'
 import TransactionModal from '../components/TransactionModal'
+import QuickAdd from '../components/QuickAdd'
 
-const INCOME_COLOR = '#1ea64a'
-const EXPENSE_COLOR = '#e34948'
+/** ข้อมูลแหล่งเงินของรายการ (รองรับ 'อื่นๆ' ที่ผู้ใช้พิมพ์เอง) */
+function sourceOf(tx) {
+  const preset = FUNDING_SOURCES.find((s) => s.id === tx.funding_source)
+  if (!preset) return null
+  return {
+    icon: preset.icon,
+    label: tx.funding_source === 'other' && tx.funding_source_label ? tx.funding_source_label : preset.label,
+  }
+}
+
+const INCOME_COLOR = '#22c55e'
+const EXPENSE_COLOR = '#ef4444'
 
 function shiftDay(dateISO, delta) {
   const d = new Date(`${dateISO}T00:00:00`)
@@ -78,6 +90,13 @@ export default function Home() {
 
   return (
     <div className="space-y-5">
+      {/* AI Quick Add — บันทึกเร็วจากหน้าแรกได้เลย */}
+      <QuickAdd
+        categories={categories}
+        defaultDate={tab === 'daily' ? selectedDate : todayISO()}
+        onAdded={invalidate}
+      />
+
       {/* Tabs + เพิ่ม */}
       <div className="flex items-center justify-between gap-3">
         <div className="inline-flex rounded-full border border-hairline bg-canvas p-1">
@@ -137,7 +156,7 @@ function TabButton({ active, onClick, icon: Icon, label }) {
     <button
       onClick={onClick}
       className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,transform] duration-200 ease-out active:scale-[0.97] ${
-        active ? 'bg-ink text-canvas' : 'text-ink hover:bg-surface'
+        active ? 'bg-surface-card text-ink' : 'text-muted hover:bg-surface-card hover:text-ink'
       }`}
     >
       <Icon className="h-4 w-4" />
@@ -152,14 +171,6 @@ function MonthlyView({ month, onMonth, dailyTotals, selectedDate, onSelectDate, 
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <MonthPicker value={month} onChange={onMonth} />
-        <div className="flex items-center gap-4 text-xs text-muted">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: INCOME_COLOR }} /> รายรับ
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: EXPENSE_COLOR }} /> รายจ่าย
-          </span>
-        </div>
       </div>
       <Card interactive className="p-3 sm:p-4">
         {isLoading ? (
@@ -277,6 +288,7 @@ function SummaryTile({ label, value, icon: Icon, color, net }) {
 function DayRow({ tx, index, onEdit, onDelete }) {
   const [confirming, setConfirming] = useState(false)
   const isIncome = tx.type === 'income'
+  const src = sourceOf(tx)
 
   return (
     <li
@@ -297,9 +309,18 @@ function DayRow({ tx, index, onEdit, onDelete }) {
             </Badge>
           )}
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-muted">
+        <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted">
           <Clock className="h-3 w-3" />
           {formatTime(tx.created_at)} · {tx.category?.name_th || 'ไม่ระบุหมวด'}
+          {src && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="inline-flex items-center gap-1">
+                <CategoryIcon name={src.icon} className="h-3 w-3" />
+                {src.label}
+              </span>
+            </>
+          )}
         </p>
       </div>
 
@@ -313,7 +334,7 @@ function DayRow({ tx, index, onEdit, onDelete }) {
           <>
             <button
               onClick={onDelete}
-              className="rounded-full bg-[#fbeeee] px-3 py-1 text-xs font-medium text-[#e34948] hover:bg-[#f7dede]"
+              className="rounded-lg bg-expense/10 px-3 py-1 text-xs font-medium text-expense hover:bg-expense/20"
             >
               ลบเลย
             </button>
@@ -335,7 +356,7 @@ function DayRow({ tx, index, onEdit, onDelete }) {
             </button>
             <button
               onClick={() => setConfirming(true)}
-              className="rounded-full p-1.5 text-muted transition hover:bg-[#fbeeee] hover:text-[#e34948] sm:opacity-0 sm:group-hover:opacity-100"
+              className="rounded-lg p-1.5 text-muted transition hover:bg-expense/10 hover:text-expense sm:opacity-0 sm:group-hover:opacity-100"
               aria-label="ลบ"
             >
               <Trash2 className="h-4 w-4" />

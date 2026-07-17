@@ -27,6 +27,44 @@ const clone = (v) => JSON.parse(JSON.stringify(v))
 const catById = (id) => db.categories.find((c) => c.id === id)
 const monthOf = (isoDate) => (isoDate || '').slice(0, 7)
 
+// ---------------- Savings model ----------------
+// เงินออมเข้า  = รายจ่ายที่จัดอยู่ในหมวด "Savings" (ย้ายเงินเข้ากระปุก)
+// ถอนเงินออม   = รายการที่จ่ายด้วย funding_source = 'savings' (ไม่นับตัวที่เป็นหมวด Savings เอง)
+// คงเหลือ      = สะสมทั้งหมดตั้งแต่ต้นจนถึงวันสิ้นงวด (เข้า - ถอน)
+const savingsCatId = () => db.categories.find((c) => c.name === 'Savings')?.id
+
+function savingsIn(t) {
+  return t.type === 'expense' && t.category_id === savingsCatId()
+}
+function savingsOut(t) {
+  return t.funding_source === 'savings' && t.category_id !== savingsCatId()
+}
+
+/** รวมเงินออมเข้า/ออก ของรายการที่ผ่าน filter */
+function sumSavings(rows) {
+  let saved = 0
+  let withdrawn = 0
+  for (const t of rows) {
+    if (savingsIn(t)) saved += t.amount
+    else if (savingsOut(t)) withdrawn += t.amount
+  }
+  return { saved, withdrawn }
+}
+
+/** เงินออมคงเหลือสะสม ณ วันสิ้นงวด (endISO) */
+function savingsRemainingAsOf(endISO) {
+  const rows = db.transactions.filter((t) => t.transaction_date <= endISO)
+  const { saved, withdrawn } = sumSavings(rows)
+  return saved - withdrawn
+}
+
+/** วันสุดท้ายของเดือน "YYYY-MM" */
+function endOfMonth(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number)
+  const last = new Date(y, m, 0).getDate()
+  return `${monthKey}-${String(last).padStart(2, '0')}`
+}
+
 // ---------------- Profile ----------------
 export async function getMe() {
   await delay(120)
@@ -109,6 +147,8 @@ export async function addTransaction(input) {
     description: input.description?.trim() || '',
     transaction_date: input.transaction_date || todayISO(),
     created_at: new Date().toISOString(),
+    funding_source: input.funding_source || 'cash',
+    funding_source_label: input.funding_source_label?.trim() || '',
     source: 'manual',
     ai_categorized: !!input.ai_categorized,
   }
@@ -171,12 +211,19 @@ export async function getDashboardSummary({ month } = {}) {
       .slice(0, 6),
   ).map((t) => ({ ...t, category: catById(t.category_id) || null }))
 
+  const { saved, withdrawn } = sumSavings(inMonth)
+
   return {
     month: m,
     income,
     expense,
     balance: income - expense,
     tx_count: inMonth.length,
+    savings: {
+      saved,
+      withdrawn,
+      remaining: savingsRemainingAsOf(endOfMonth(m)),
+    },
     breakdown,
     trend,
     recent,
@@ -190,14 +237,26 @@ export async function getYearlySummary({ year } = {}) {
   const months = []
   let income = 0
   let expense = 0
+  let saved = 0
+  let withdrawn = 0
   for (let mm = 1; mm <= 12; mm++) {
     const key = `${y}-${String(mm).padStart(2, '0')}`
     const rows = db.transactions.filter((t) => monthOf(t.transaction_date) === key)
     const inc = rows.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
     const exp = rows.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
-    months.push({ month: key, income: inc, expense: exp, balance: inc - exp })
+    const sv = sumSavings(rows)
+    months.push({
+      month: key,
+      income: inc,
+      expense: exp,
+      balance: inc - exp,
+      saved: sv.saved,
+      withdrawn: sv.withdrawn,
+    })
     income += inc
     expense += exp
+    saved += sv.saved
+    withdrawn += sv.withdrawn
   }
   const activeMonths = months.filter((mo) => mo.income > 0 || mo.expense > 0).length || 1
   const best = [...months].sort((a, b) => b.balance - a.balance)[0]
@@ -210,6 +269,11 @@ export async function getYearlySummary({ year } = {}) {
     avg_expense: Math.round(expense / activeMonths),
     avg_income: Math.round(income / activeMonths),
     best_month: best,
+    savings: {
+      saved,
+      withdrawn,
+      remaining: savingsRemainingAsOf(`${y}-12-31`),
+    },
   }
 }
 

@@ -5,12 +5,13 @@ import { createPortal } from 'react-dom'
 import {
   Wallet, Clock, Gift, Briefcase, UtensilsCrossed, Coffee, Bus, Home, Plug,
   ShoppingBag, Clapperboard, HeartPulse, GraduationCap, PiggyBank, Ellipsis,
-  Tag, X, Loader2,
+  Tag, X, Loader2, Landmark, CreditCard, Banknote, TrendingUp,
 } from 'lucide-react'
 
 const ICONS = {
   Wallet, Clock, Gift, Briefcase, UtensilsCrossed, Coffee, Bus, Home, Plug,
   ShoppingBag, Clapperboard, HeartPulse, GraduationCap, PiggyBank, Ellipsis, Tag,
+  Landmark, CreditCard, Banknote, TrendingUp,
 }
 
 /** ไอคอนหมวดหมู่จากชื่อ (fallback เป็น Tag) */
@@ -37,14 +38,15 @@ export function Button({
   disabled,
   ...props
 }) {
-  // ปุ่มทุกตัวเป็น pill (rounded-full) ตาม DESIGN.md
+  // ปุ่มมุมโค้ง 12px (rounded-xl) ตาม DESIGN.md (Clay) — ไม่ใช่ pill
   const base =
-    'inline-flex items-center justify-center gap-2 rounded-full font-medium transition-[transform,background-color,border-color,box-shadow,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]'
+    'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-[transform,background-color,border-color,box-shadow,opacity] duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/25 disabled:opacity-45 disabled:cursor-not-allowed active:scale-[0.98]'
   const variants = {
-    primary: 'bg-ink text-canvas hover:bg-ink/90',
-    secondary: 'bg-canvas text-ink border border-hairline hover:bg-surface',
-    ghost: 'text-ink hover:bg-surface',
-    danger: 'bg-canvas text-[#e34948] border border-[#f0caca] hover:bg-[#fbeeee]',
+    primary: 'bg-ink text-white hover:bg-ink/90',
+    secondary: 'bg-canvas text-ink border border-hairline hover:bg-surface-card',
+    onColor: 'bg-canvas text-ink hover:bg-surface-card',
+    ghost: 'text-ink hover:bg-surface-card',
+    danger: 'bg-canvas text-expense border border-expense/25 hover:bg-expense/10',
   }
   const sizes = {
     sm: 'h-9 px-4 text-sm',
@@ -64,13 +66,13 @@ export function Button({
   )
 }
 
-/** การ์ดมาตรฐาน — เส้น hairline; ใส่ interactive เพื่อยกลอยตอน hover */
+/** การ์ดเนื้อหา — canvas + เส้น hairline, มุมโค้ง 16px (rounded-2xl) */
 export function Card({ children, className = '', interactive = false, ...props }) {
   return (
     <div
       className={cx(
-        'rounded-3xl border border-hairline bg-canvas',
-        interactive && 'hover-lift',
+        'rounded-2xl border border-hairline bg-canvas',
+        interactive && 'hover-soft',
         className,
       )}
       {...props}
@@ -80,19 +82,20 @@ export function Card({ children, className = '', interactive = false, ...props }
   )
 }
 
-/** Color block — พาเนลพาสเทลขนาดใหญ่ (signature); interactive = ยกลอยตอน hover */
-export function ColorBlock({ tone = 'lilac', className = '', interactive = false, children, ...props }) {
+/** Feature card — สีจัดแบบ Clay, มุมโค้ง 24px (rounded-3xl); interactive = ยกลอยตอน hover */
+export function ColorBlock({ tone = 'lavender', className = '', interactive = false, children, ...props }) {
   const tones = {
-    lime: 'bg-lime text-ink',
-    lilac: 'bg-lilac text-ink',
-    cream: 'bg-cream text-ink',
-    pink: 'bg-pink text-ink',
+    pink: 'bg-pink text-white',
+    teal: 'bg-teal text-white',
+    coral: 'bg-coral text-white',
+    lavender: 'bg-lavender text-ink',
+    peach: 'bg-peach text-ink',
+    ochre: 'bg-ochre text-ink',
     mint: 'bg-mint text-ink',
-    coral: 'bg-coral text-ink',
-    navy: 'bg-navy text-canvas',
+    cream: 'bg-surface-card text-ink',
   }
   return (
-    <div className={cx('rounded-3xl', tones[tone], interactive && 'hover-lift', className)} {...props}>
+    <div className={cx('rounded-3xl', tones[tone], interactive && 'hover-soft', className)} {...props}>
       {children}
     </div>
   )
@@ -111,7 +114,7 @@ export function Field({ label, hint, error, children }) {
       )}
       {children}
       {error ? (
-        <span className="mt-1 block text-xs font-medium text-[#e34948]">{error}</span>
+        <span className="mt-1 block text-xs font-medium text-expense">{error}</span>
       ) : hint ? (
         <span className="mt-1 block text-xs text-muted">{hint}</span>
       ) : null}
@@ -119,9 +122,9 @@ export function Field({ label, hint, error, children }) {
   )
 }
 
-// input radius = 8px (rounded-lg) ตาม DESIGN.md, focus ด้วย ring ไม่เปลี่ยนพื้น
+// input radius = 12px (rounded-xl) ตาม DESIGN.md (Clay), สูง 44px, โฟกัสด้วยขอบ ink
 const inputBase =
-  'w-full h-11 rounded-lg border border-hairline bg-canvas px-3.5 text-sm text-ink placeholder:text-muted transition focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/15'
+  'w-full h-11 rounded-xl border border-hairline bg-canvas px-4 text-sm text-ink placeholder:text-muted-soft transition focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10'
 
 export function Input({ className = '', ...props }) {
   return <input className={cx(inputBase, className)} {...props} />
@@ -135,13 +138,13 @@ export function Select({ className = '', children, ...props }) {
   )
 }
 
-/** Badge — พื้น pastel ตัวหนังสือดำเสมอ */
+/** Badge — pill ฟิลล์ครีม/สีอ่อน (badge-pill) */
 export function Badge({ children, tone = 'neutral', className = '' }) {
   const tones = {
-    neutral: 'bg-surface text-ink',
+    neutral: 'bg-surface-card text-ink',
     income: 'bg-mint text-ink',
-    expense: 'bg-pink text-ink',
-    ai: 'bg-lilac text-ink',
+    expense: 'bg-peach text-ink',
+    ai: 'bg-lavender text-ink',
   }
   return (
     <span
@@ -207,13 +210,13 @@ export function Modal({ open, onClose, title, children, footer }) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="animate-scale-in relative z-10 w-full max-w-md rounded-t-3xl border border-hairline bg-canvas p-6 shadow-2xl sm:rounded-3xl"
+        className="animate-scale-in relative z-10 w-full max-w-md rounded-t-2xl border border-hairline bg-canvas p-6 shadow-2xl sm:rounded-2xl"
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 className="display text-xl text-ink">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-muted hover:bg-surface hover:text-ink"
+            className="rounded-lg p-1.5 text-muted hover:bg-surface-card hover:text-ink"
             aria-label="ปิด"
           >
             <X className="h-5 w-5" />

@@ -83,7 +83,7 @@ function GoalCard({ goal, onChanged }) {
     <Card interactive className="flex flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lilac text-ink">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lavender text-ink">
             <Target className="h-5 w-5" />
           </span>
           <div>
@@ -100,7 +100,7 @@ function GoalCard({ goal, onChanged }) {
                 await deleteGoal(goal.id)
                 onChanged()
               }}
-              className="rounded-full bg-[#fbeeee] px-3 py-1 text-xs font-medium text-[#e34948] hover:bg-[#f7dede]"
+              className="rounded-lg bg-expense/10 px-3 py-1 text-xs font-medium text-expense hover:bg-expense/20"
             >
               ลบ
             </button>
@@ -114,7 +114,7 @@ function GoalCard({ goal, onChanged }) {
         ) : (
           <button
             onClick={() => setConfirming(true)}
-            className="rounded-full p-1.5 text-muted hover:bg-[#fbeeee] hover:text-[#e34948]"
+            className="rounded-lg p-1.5 text-muted hover:bg-expense/10 hover:text-expense"
             aria-label="ลบเป้าหมาย"
           >
             <Trash2 className="h-4 w-4" />
@@ -175,7 +175,7 @@ function GoalCard({ goal, onChanged }) {
               </div>
             )}
 
-            <p className="rounded-2xl bg-lilac p-4 text-sm leading-relaxed text-ink">{plan.advice_th}</p>
+            <p className="rounded-2xl bg-lavender p-4 text-sm leading-relaxed text-ink">{plan.advice_th}</p>
             <button
               onClick={() => planMutation.mutate()}
               className="text-xs font-medium text-ink underline underline-offset-2 hover:text-muted"
@@ -275,7 +275,7 @@ function GoalModal({ onClose, onSaved }) {
             onChange={(e) => setForm((f) => ({ ...f, target_date: e.target.value }))}
           />
         </Field>
-        {error && <p className="text-sm font-medium text-[#e34948]">{error}</p>}
+        {error && <p className="text-sm font-medium text-expense">{error}</p>}
       </form>
     </Modal>
   )

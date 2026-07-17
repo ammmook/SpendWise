@@ -1,14 +1,13 @@
 // โครงหน้าหลัก: sidebar (desktop) + bottom nav (mobile) — สไตล์ขาว-ดำ ตาม DESIGN.md
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  Home, LayoutDashboard, ArrowLeftRight, Target, Sparkles, Settings, LogOut, PiggyBank,
+  Home, LayoutDashboard, Target, Sparkles, Settings, LogOut, PiggyBank,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const NAV = [
   { to: '/', label: 'หน้าแรก', eyebrow: 'HOME', icon: Home, end: true },
   { to: '/dashboard', label: 'วิเคราะห์', eyebrow: 'DASHBOARD', icon: LayoutDashboard },
-  { to: '/transactions', label: 'รายการ', eyebrow: 'TRANSACTIONS', icon: ArrowLeftRight },
   { to: '/goals', label: 'เป้าหมาย', eyebrow: 'GOALS', icon: Target },
   { to: '/what-if', label: 'จำลอง', eyebrow: 'SIMULATION', icon: Sparkles },
   { to: '/settings', label: 'ตั้งค่า', eyebrow: 'SETTINGS', icon: Settings },
@@ -44,24 +43,21 @@ export default function Layout() {
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-200 ease-out ${
+                `group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-200 ease-out ${
                   isActive
-                    ? 'bg-ink text-canvas'
-                    : 'text-ink hover:bg-surface'
+                    ? 'bg-surface-card text-ink'
+                    : 'text-muted hover:bg-surface-card hover:text-ink'
                 }`
               }
             >
-              <item.icon
-                className="h-[18px] w-[18px] transition-transform duration-200 ease-out group-hover:scale-110"
-                strokeWidth={1.9}
-              />
+              <item.icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
               {item.label}
             </NavLink>
           ))}
         </nav>
         <div className="border-t border-hairline-soft pt-4">
           <div className="mb-3 flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-surface text-sm font-semibold text-ink">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-surface-card text-sm font-semibold text-ink">
               {(user?.display_name?.[0] || 'U').toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -73,7 +69,7 @@ export default function Layout() {
           </div>
           <button
             onClick={signOut}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-2 text-sm font-medium text-ink transition hover:bg-surface"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium text-muted transition hover:bg-surface-card hover:text-ink"
           >
             <LogOut className="h-[18px] w-[18px]" strokeWidth={1.9} />
             ออกจากระบบ
@@ -95,7 +91,7 @@ export default function Layout() {
             </div>
             <button
               onClick={signOut}
-              className="rounded-full p-2 text-muted hover:bg-surface hover:text-ink lg:hidden"
+              className="rounded-xl p-2 text-muted hover:bg-surface-card hover:text-ink lg:hidden"
               aria-label="ออกจากระบบ"
             >
               <LogOut className="h-5 w-5" />
@@ -113,7 +109,7 @@ export default function Layout() {
 
       {/* Bottom nav — mobile */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-canvas/95 backdrop-blur lg:hidden">
-        <div className="grid grid-cols-6 px-1 py-1.5">
+        <div className="mx-auto grid max-w-md grid-cols-5 px-2 py-1.5">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -125,7 +121,7 @@ export default function Layout() {
                 <>
                   <span
                     className={`flex h-9 w-9 items-center justify-center rounded-full transition-[background-color,transform] duration-200 ease-out active:scale-90 ${
-                      isActive ? 'bg-ink text-canvas' : 'text-ink'
+                      isActive ? 'bg-surface-card text-ink' : 'text-muted'
                     }`}
                   >
                     <item.icon className="h-[18px] w-[18px]" strokeWidth={1.9} />

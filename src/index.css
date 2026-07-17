@@ -1,37 +1,41 @@
 @import 'tailwindcss';
 
 /* =====================================================================
-   Design tokens — อิงจาก DESIGN.md (Figma editorial: ขาว-ดำ + pastel block)
-   ระบบหลักเป็น monochrome (ดำ/ขาว) ตัดด้วย pastel color-block ขนาดใหญ่
+   Design tokens — อิงจาก DESIGN.md (Clay.com: cream canvas + saturated cards)
+   พื้นครีมอุ่น + ปุ่มดำมุมโค้ง 12px + การ์ดสีจัด (pink/teal/lavender/peach/ochre)
    ===================================================================== */
 @theme {
-  --font-sans: 'Anuphan', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: 'Inter', 'Anuphan', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* Core monochrome */
-  --color-ink: #000000; /* หัวข้อ, เนื้อความ, ปุ่มหลัก */
-  --color-canvas: #ffffff; /* พื้นการ์ด */
-  --color-surface: #f7f7f5; /* พื้นหน้า/แท็บ/ไอคอนปุ่ม */
-  --color-hairline: #e6e6e6; /* เส้นขอบ 1px */
-  --color-hairline-soft: #f1f1f1; /* เส้นแบ่งอ่อน */
-  --color-muted: #6f6f6f; /* meta/caption เท่านั้น (ปรับให้อ่านง่ายในแอป) */
+  /* Ink / text */
+  --color-ink: #0a0a0a; /* หัวข้อ + ปุ่มหลัก (ดำอมอุ่น) */
+  --color-body: #3a3a3a;
+  --color-muted: #6a6a6a;
+  --color-muted-soft: #9a9a9a;
 
-  /* Pastel color blocks (จาก DESIGN.md) */
-  --color-lime: #dceeb1;
-  --color-lilac: #c5b0f4;
-  --color-cream: #f4ecd6;
-  --color-pink: #efd4d4;
-  --color-mint: #c8e6cd;
-  --color-coral: #f3c9b6;
-  --color-navy: #1f1d3d;
+  /* Surfaces — ครีมทั้งระบบ */
+  --color-canvas: #fffaf0; /* พื้นการ์ด/อินพุต (ครีมขาว) */
+  --color-surface: #faf5e8; /* พื้นหน้า/ฟิลล์อ่อน */
+  --color-surface-card: #f5f0e0; /* การ์ดครีม/แท็บ active/ไอคอน */
+  --color-surface-strong: #ebe6d6;
+  --color-hairline: #e5e5e5;
+  --color-hairline-soft: #f0f0f0;
 
-  /* Accent + semantic (ใช้อย่างจำกัด) */
-  --color-magenta: #ff3d8b;
-  --color-success: #1ea64a;
+  /* Saturated feature-card palette (6 สีของ Clay) */
+  --color-pink: #ff4d8b;
+  --color-teal: #1a3a3a;
+  --color-lavender: #b8a4ed;
+  --color-peach: #ffb084;
+  --color-ochre: #e8b94a;
+  --color-mint: #a4d4c5;
+  --color-coral: #ff6b5a;
 
-  /* Chart palette — validated ด้วย dataviz (ไม่ได้อยู่ใน DESIGN.md เพราะ marketing ไม่มีกราฟ) */
-  --color-chart-income: #1ea64a;
-  --color-chart-expense: #e34948;
+  /* Semantic (Clay) — income/expense ใช้ success/error */
+  --color-income: #22c55e;
+  --color-expense: #ef4444;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 }
 
 /* =====================================================================
@@ -48,26 +52,25 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-weight: 400;
-  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Eyebrow / caption แบบ mono ตัวพิมพ์ใหญ่ (taxonomy marker) */
+/* Eyebrow / section label — Inter ตัวพิมพ์ใหญ่ (caption-uppercase) */
 .eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 11px;
-  font-weight: 500;
+  letter-spacing: 0.125em;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-muted);
 }
 
-/* Display headline — negative tracking แบบ editorial */
+/* Display headline — Inter 500 + negative tracking (แทน Plain Black) */
 .display {
-  letter-spacing: -0.03em;
-  font-weight: 600;
-  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+  line-height: 1.1;
 }
 
 /* ตัวเลขเงิน ความกว้างเท่ากัน */
@@ -111,23 +114,16 @@ body {
   animation: fadeIn 0.2s ease-out both;
 }
 
-/* การ์ดลอยตอน hover — soft shadow (elevation 2 ตาม DESIGN.md ใช้ตอน hover เท่านั้น) */
-.hover-lift {
+/* Hover การ์ด — นิ่ง ไม่ขยับตำแหน่ง: เปลี่ยนเฉพาะขอบ + เงาบางๆ */
+.hover-soft {
   transition:
-    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px -14px rgb(15 23 42 / 0.22);
-}
-
-/* เงานุ่มสำหรับการ์ด analytics (หน้า Dashboard) */
-.shadow-soft {
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.04),
-    0 6px 16px -8px rgb(15 23 42 / 0.1);
+.hover-soft:hover {
+  border-color: var(--color-muted-soft);
+  box-shadow: 0 4px 14px -6px rgb(10 10 10 / 0.12);
 }
 
 /* Skeleton loading — shimmer เลื่อนด้วย transform (ไม่ทำงานกับ width/height) */
@@ -163,8 +159,5 @@ body {
   }
   .skeleton::after {
     display: none;
-  }
-  .hover-lift:hover {
-    transform: none;
   }
 }

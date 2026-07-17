@@ -36,7 +36,7 @@ export default function WhatIf() {
         </p>
       </div>
 
-      <ColorBlock tone="lilac" className="p-5">
+      <ColorBlock tone="lavender" className="p-5">
         <div className="mb-3 flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
           <p className="eyebrow !text-ink/70">Ask AI</p>
@@ -91,9 +91,9 @@ export default function WhatIf() {
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <ResultBlock tone="mint" icon={CalendarDays} label="ต่อเดือน" value={result.monthly} />
-              <ResultBlock tone="lime" icon={CalendarRange} label="ต่อปี" value={result.yearly} />
+              <ResultBlock tone="peach" icon={CalendarRange} label="ต่อปี" value={result.yearly} />
             </div>
-            <ColorBlock tone="lilac" interactive className="flex flex-col justify-between p-6 lg:col-span-2">
+            <ColorBlock tone="lavender" interactive className="flex flex-col justify-between p-6 lg:col-span-2">
               <div className="flex items-center gap-2 text-ink/70">
                 <TrendingUp className="h-5 w-5" />
                 <span className="text-sm">ใน 5 ปี</span>

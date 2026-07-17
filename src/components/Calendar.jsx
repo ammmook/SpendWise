@@ -25,7 +25,7 @@ export default function Calendar({ month, dailyTotals, selectedDate, onSelectDat
           <div
             key={w}
             className={`py-1 text-center text-[11px] font-medium ${
-              i === 0 || i === 6 ? 'text-[#e34948]/70' : 'text-muted'
+              i === 0 || i === 6 ? 'text-expense/70' : 'text-muted'
             }`}
           >
             {w}
@@ -46,7 +46,7 @@ export default function Calendar({ month, dailyTotals, selectedDate, onSelectDat
             <button
               key={date}
               onClick={() => onSelectDate(date)}
-              className={`group flex min-h-[58px] flex-col rounded-xl border p-1.5 text-left transition-[background-color,border-color,transform] duration-200 ease-out hover:-translate-y-0.5 sm:min-h-[76px] sm:p-2 ${
+              className={`group flex min-h-[58px] flex-col rounded-xl border p-1.5 text-left transition-[background-color,border-color] duration-200 ease-out sm:min-h-[76px] sm:p-2 ${
                 isSelected
                   ? 'border-ink bg-ink text-canvas'
                   : isToday
@@ -66,7 +66,7 @@ export default function Calendar({ month, dailyTotals, selectedDate, onSelectDat
                   {totals.income > 0 && (
                     <span
                       className={`text-[9px] font-medium tabular sm:text-[11px] ${
-                        isSelected ? 'text-mint' : 'text-[#1ea64a]'
+                        isSelected ? 'text-mint' : 'text-income'
                       }`}
                     >
                       +{formatCompact(totals.income)}
@@ -75,7 +75,7 @@ export default function Calendar({ month, dailyTotals, selectedDate, onSelectDat
                   {totals.expense > 0 && (
                     <span
                       className={`text-[9px] font-medium tabular sm:text-[11px] ${
-                        isSelected ? 'text-pink' : 'text-[#e34948]'
+                        isSelected ? 'text-peach' : 'text-expense'
                       }`}
                     >
                       -{formatCompact(totals.expense)}

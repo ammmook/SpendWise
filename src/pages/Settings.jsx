@@ -79,7 +79,7 @@ function ProfileSection() {
           บันทึกโปรไฟล์
         </Button>
         {saved && (
-          <span className="flex items-center gap-1 text-sm font-medium text-[#1ea64a]">
+          <span className="flex items-center gap-1 text-sm font-medium text-income">
             <Check className="h-4 w-4" /> บันทึกแล้ว
           </span>
         )}
@@ -148,7 +148,7 @@ function CategoriesSection() {
           <Plus className="h-4 w-4" /> เพิ่ม
         </Button>
       </form>
-      {error && <p className="mt-2 text-sm font-medium text-[#e34948]">{error}</p>}
+      {error && <p className="mt-2 text-sm font-medium text-expense">{error}</p>}
 
       {custom.length > 0 && (
         <div className="mt-6">
@@ -164,7 +164,7 @@ function CategoriesSection() {
                 <span className="text-[10px] text-muted">{c.type === 'income' ? 'รับ' : 'จ่าย'}</span>
                 <button
                   onClick={() => delMutation.mutate(c.id)}
-                  className="rounded-full p-1 text-muted hover:bg-[#fbeeee] hover:text-[#e34948]"
+                  className="rounded-full p-1 text-muted hover:bg-expense/10 hover:text-expense"
                   aria-label={`ลบ ${c.name_th}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

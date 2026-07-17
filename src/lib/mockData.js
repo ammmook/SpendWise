@@ -30,17 +30,34 @@ const catByName = (name) => CATEGORIES.find((c) => c.name === name)
 
 export const BASE_SALARY = 32000
 
+// ---------- Funding sources (แหล่งเงิน) ----------
+// ใช้ระบุว่าเงินมาจาก/ถูกหักจากกระเป๋าไหน — เก็บไว้ใช้ทำรายงานต่อ
+// id 'savings' มีความหมายพิเศษ: ถ้าใช้จ่ายด้วยแหล่งนี้ = ถอนเงินออม
+export const FUNDING_SOURCES = [
+  { id: 'salary', label: 'เงินเดือน', icon: 'Briefcase' },
+  { id: 'savings', label: 'เงินออม', icon: 'PiggyBank' },
+  { id: 'bank', label: 'บัญชีธนาคาร', icon: 'Landmark' },
+  { id: 'credit', label: 'บัตรเครดิต', icon: 'CreditCard' },
+  { id: 'cash', label: 'เงินสด', icon: 'Banknote' },
+  { id: 'investment', label: 'การลงทุน', icon: 'TrendingUp' },
+  { id: 'other', label: 'อื่นๆ', icon: 'Ellipsis' },
+]
+
 // ---------- Transactions ----------
 // สร้างรายการย้อนหลัง 6 เดือน ให้ dashboard มีข้อมูลกราฟ
+// src = funding_source ของรายการนั้น
 const EXPENSE_TEMPLATES = [
-  { cat: 'Food', desc: 'ข้าวมันไก่', min: 45, max: 90, perMonth: 22 },
-  { cat: 'Coffee & Drinks', desc: 'ลาเต้ร้านกาแฟ', min: 55, max: 120, perMonth: 14 },
-  { cat: 'Transport', desc: 'ค่ารถไฟฟ้า', min: 30, max: 80, perMonth: 18 },
-  { cat: 'Housing', desc: 'ค่าเช่าห้อง', min: 6500, max: 6500, perMonth: 1 },
-  { cat: 'Utilities', desc: 'ค่าน้ำไฟเน็ต', min: 900, max: 1600, perMonth: 2 },
-  { cat: 'Shopping', desc: 'ซื้อของใช้', min: 200, max: 1500, perMonth: 3 },
-  { cat: 'Entertainment', desc: 'ดูหนัง/Netflix', min: 150, max: 600, perMonth: 2 },
-  { cat: 'Health', desc: 'ยา/วิตามิน', min: 120, max: 800, perMonth: 1 },
+  { cat: 'Food', desc: 'ข้าวมันไก่', min: 45, max: 90, perMonth: 22, src: 'cash' },
+  { cat: 'Coffee & Drinks', desc: 'ลาเต้ร้านกาแฟ', min: 55, max: 120, perMonth: 14, src: 'cash' },
+  { cat: 'Transport', desc: 'ค่ารถไฟฟ้า', min: 30, max: 80, perMonth: 18, src: 'cash' },
+  { cat: 'Housing', desc: 'ค่าเช่าห้อง', min: 6500, max: 6500, perMonth: 1, src: 'bank' },
+  { cat: 'Utilities', desc: 'ค่าน้ำไฟเน็ต', min: 900, max: 1600, perMonth: 2, src: 'bank' },
+  { cat: 'Shopping', desc: 'ซื้อของใช้', min: 200, max: 1500, perMonth: 3, src: 'credit' },
+  { cat: 'Entertainment', desc: 'ดูหนัง/Netflix', min: 150, max: 600, perMonth: 2, src: 'credit' },
+  // เงินออม: ย้ายจากเงินเดือนเข้ากระปุกทุกเดือน
+  { cat: 'Savings', desc: 'ออมเงินประจำเดือน', min: 3000, max: 6000, perMonth: 1, src: 'salary' },
+  // จ่ายด้วยเงินออม = ถอนออม
+  { cat: 'Health', desc: 'ค่ารักษาพยาบาล', min: 800, max: 3500, perMonth: 1, src: 'savings' },
 ]
 
 function randBetween(min, max) {
@@ -76,6 +93,7 @@ function buildTransactions() {
       description: 'เงินเดือน',
       transaction_date: dayISO(1),
       created_at: withTime(dayISO(1), 9),
+      funding_source: 'salary',
       source: 'salary_sync',
       ai_categorized: false,
     })
@@ -90,6 +108,7 @@ function buildTransactions() {
         description: 'ค่าล่วงเวลา',
         transaction_date: dayISO(20),
         created_at: withTime(dayISO(20), 18),
+        funding_source: 'salary',
         source: 'manual',
         ai_categorized: false,
       })
@@ -109,6 +128,7 @@ function buildTransactions() {
           description: t.desc,
           transaction_date: dateStr,
           created_at: withTime(dateStr, 7 + Math.floor(Math.random() * 14)),
+          funding_source: t.src,
           source: 'manual',
           ai_categorized: Math.random() > 0.7,
         })

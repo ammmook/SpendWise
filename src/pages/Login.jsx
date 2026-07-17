@@ -40,7 +40,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen bg-canvas p-3 sm:p-4">
       {/* Color-block panel — desktop */}
-      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden rounded-3xl bg-lilac p-12 text-ink lg:flex">
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden rounded-3xl bg-lavender p-12 text-ink lg:flex">
         <div className="flex items-center gap-2.5">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-canvas">
             <PiggyBank className="h-6 w-6" />
@@ -68,7 +68,7 @@ export default function Login() {
                 key={text}
                 className="flex items-baseline gap-4 border-b border-ink/15 py-3.5"
               >
-                <span className="font-mono text-sm tabular text-ink/45">
+                <span className="text-sm font-semibold tabular text-ink/45">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span>{text}</span>
@@ -132,7 +132,7 @@ export default function Login() {
             </Field>
 
             {errors.form && (
-              <p className="rounded-lg bg-[#fbeeee] px-3 py-2 text-sm font-medium text-[#e34948]">
+              <p className="rounded-lg bg-expense/10 px-3 py-2 text-sm font-medium text-expense">
                 {errors.form}
               </p>
             )}
@@ -157,7 +157,7 @@ export default function Login() {
           </p>
 
           <p className="mt-6 flex items-center justify-center gap-1.5 rounded-lg bg-surface px-3 py-2 text-center text-xs text-muted">
-            <Check className="h-3.5 w-3.5 text-[#1ea64a]" />
+            <Check className="h-3.5 w-3.5 text-income" />
             เดโม (Phase 1): กรอกอีเมลและรหัสผ่านใดก็ได้เพื่อเข้าใช้งาน
           </p>
         </div>

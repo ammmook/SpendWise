@@ -2,8 +2,9 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { addTransaction, updateTransaction } from '../lib/api'
+import { FUNDING_SOURCES } from '../lib/mockData'
 import { todayISO } from '../lib/format'
-import { Button, Field, Input, Select, Modal } from './ui'
+import { Button, Field, Input, Select, Modal, CategoryIcon } from './ui'
 
 export default function TransactionModal({ tx, categories, defaultDate, onClose, onSaved }) {
   const isEdit = !!tx
@@ -13,10 +14,13 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
     description: tx?.description || '',
     category_id: tx?.category_id || '',
     transaction_date: tx?.transaction_date || defaultDate || todayISO(),
+    funding_source: tx?.funding_source || 'cash',
+    funding_source_label: tx?.funding_source_label || '',
   })
   const [error, setError] = useState('')
 
   const cats = categories.filter((c) => c.type === form.type)
+  const activeSource = FUNDING_SOURCES.find((s) => s.id === form.funding_source)
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -106,6 +110,37 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
           </Select>
         </Field>
 
+        <Field
+          label={form.type === 'income' ? 'เงินเข้าที่ไหน' : 'จ่ายด้วยแหล่งเงินไหน'}
+          hint="ใช้สำหรับสรุปเงินออมและรายงาน"
+        >
+          <div className="flex items-center gap-2">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-hairline bg-surface-card text-ink">
+              <CategoryIcon name={activeSource?.icon} className="h-[18px] w-[18px]" />
+            </span>
+            <Select
+              value={form.funding_source}
+              onChange={(e) => setForm((f) => ({ ...f, funding_source: e.target.value }))}
+            >
+              {FUNDING_SOURCES.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </Field>
+
+        {form.funding_source === 'other' && (
+          <Field label="ระบุแหล่งเงิน">
+            <Input
+              placeholder="เช่น กระเป๋าเงินอิเล็กทรอนิกส์"
+              value={form.funding_source_label}
+              onChange={(e) => setForm((f) => ({ ...f, funding_source_label: e.target.value }))}
+            />
+          </Field>
+        )}
+
         <Field label="วันที่">
           <Input
             type="date"
@@ -115,7 +150,7 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
           />
         </Field>
 
-        {error && <p className="text-sm font-medium text-[#e34948]">{error}</p>}
+        {error && <p className="text-sm font-medium text-expense">{error}</p>}
       </form>
     </Modal>
   )
