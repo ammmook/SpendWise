@@ -1,22 +1,61 @@
 // Settings — แก้โปรไฟล์/ฐานเงินเดือน + จัดการหมวดหมู่ที่สร้างเอง
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Plus, Trash2, Tag } from 'lucide-react'
+import { Check, Plus, Trash2, Tag, Volume2, VolumeX } from 'lucide-react'
 import { getMe, updateMe, getCategories, addCategory, deleteCategory } from '../lib/api'
 import { formatMoney } from '../lib/format'
-import { Button, Card, Eyebrow, Field, Input, Select, CategoryIcon, Skeleton } from '../components/ui'
+import { isSoundEnabled, setSoundEnabled, playCashSound } from '../lib/sound'
+import { Button, Card, Field, Input, Select, CategoryIcon, Skeleton } from '../components/ui'
 
 export default function Settings() {
   return (
-    <div className="space-y-6">
-      <div>
-        <Eyebrow>Settings</Eyebrow>
-        <h2 className="display mt-1 text-2xl text-ink">ตั้งค่า</h2>
-        <p className="mt-1 text-sm text-muted">จัดการโปรไฟล์และหมวดหมู่ของคุณ</p>
-      </div>
+    // ไม่แสดงชื่อหน้าตามดีไซน์ใหม่
+    <div className="space-y-4 sm:space-y-6">
       <ProfileSection />
+      <SoundSection />
       <CategoriesSection />
     </div>
+  )
+}
+
+/** เปิด/ปิดเสียงยืนยันเมื่อบันทึกรายการ */
+function SoundSection() {
+  const [on, setOn] = useState(isSoundEnabled())
+
+  function toggle() {
+    const next = !on
+    setOn(next)
+    setSoundEnabled(next)
+    if (next) playCashSound() // ให้ฟังตัวอย่างทันที
+  }
+
+  return (
+    <Card className="flex items-center justify-between gap-3 p-4 sm:p-6">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-card text-ink">
+          {on ? <Volume2 className="h-[18px] w-[18px]" /> : <VolumeX className="h-[18px] w-[18px]" />}
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-ink sm:text-base">เสียงยืนยันการบันทึก</h3>
+          <p className="truncate text-xs text-muted">เล่นเสียงสั้นๆ เมื่อเพิ่มรายการสำเร็จ</p>
+        </div>
+      </div>
+      <button
+        role="switch"
+        aria-checked={on}
+        aria-label="เปิด/ปิดเสียงยืนยัน"
+        onClick={toggle}
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ${
+          on ? 'bg-ink' : 'bg-hairline'
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform duration-200 ${
+            on ? 'translate-x-5.5' : 'translate-x-0.5'
+          }`}
+        />
+      </button>
+    </Card>
   )
 }
 

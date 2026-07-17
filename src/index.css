@@ -93,7 +93,7 @@ body {
 }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.96); }
@@ -103,15 +103,47 @@ body {
   100% { transform: translateX(100%); }
 }
 
-/* Page/section entrance */
+/* Page/section entrance
+   ใช้ fill-mode: backwards (ไม่ใช่ both) โดยตั้งใจ — ถ้าใช้ both ค่า transform จาก
+   เฟรมสุดท้ายจะค้างอยู่เป็น identity matrix ทำให้ element กลายเป็น containing block
+   ของลูกที่เป็น position: fixed (ปุ่ม FAB จะเลื่อนตามเนื้อหาแทนที่จะติดขอบจอ)
+   ส่วน backwards จะกันภาพกระพริบก่อนเริ่ม แล้วปล่อยค่ากลับเป็นธรรมชาติเมื่อจบ */
 .animate-fade-up {
-  animation: fadeUp 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: fadeUp 0.28s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 .animate-scale-in {
   animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out both;
+}
+/* ผลลัพธ์จาก AI ปรากฏแบบ fade + scale ~250ms */
+.animate-result-in {
+  animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+/* แถบ shimmer กวาดผ่าน (ใช้ตอน AI กำลังวิเคราะห์) */
+.animate-sheen {
+  animation: sheen 1.4s ease-in-out infinite;
+}
+
+/* =====================================================================
+   AI theme — ใช้ gradient นี้กับฟีเจอร์ AI เท่านั้น (ห้ามใช้กับอย่างอื่น)
+   ===================================================================== */
+.ai-gradient {
+  background-image: linear-gradient(135deg, #f76174 0%, #4f72e5 100%);
+}
+.ai-gradient-text {
+  background-image: linear-gradient(135deg, #f76174 0%, #4f72e5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* FAB — ปุ่มลอยมุมขวาล่าง (Material style) */
+.fab-shadow {
+  box-shadow:
+    0 6px 16px -4px rgb(10 10 10 / 0.28),
+    0 2px 6px -2px rgb(10 10 10 / 0.2);
 }
 
 /* Hover การ์ด — นิ่ง ไม่ขยับตำแหน่ง: เปลี่ยนเฉพาะขอบ + เงาบางๆ */

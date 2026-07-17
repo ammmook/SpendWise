@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query'
 import { addTransaction, updateTransaction } from '../lib/api'
 import { FUNDING_SOURCES } from '../lib/mockData'
 import { todayISO } from '../lib/format'
+import { playCashSound } from '../lib/sound'
 import { Button, Field, Input, Select, Modal, CategoryIcon } from './ui'
 
 export default function TransactionModal({ tx, categories, defaultDate, onClose, onSaved }) {
@@ -28,7 +29,10 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
       if (isEdit) return updateTransaction(tx.id, payload)
       return addTransaction(payload)
     },
-    onSuccess: onSaved,
+    onSuccess: () => {
+      if (!isEdit) playCashSound() // เสียงยืนยันเฉพาะตอนเพิ่มรายการใหม่ (ครั้งเดียว)
+      onSaved()
+    },
     onError: (e) => setError(e.message || 'บันทึกไม่สำเร็จ'),
   })
 

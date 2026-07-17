@@ -418,10 +418,30 @@ export async function aiWhatIf({ question }) {
   const coffee = avg.byCategory['Coffee & Drinks'] || 0
   const shopping = avg.byCategory['Shopping'] || 0
   const ent = avg.byCategory['Entertainment'] || 0
+  const food = avg.byCategory['Food'] || 0
+  const housing = avg.byCategory['Housing'] || 0
+  const surplus = Math.round(avg.income - avg.expense)
+
+  // ค่าประมาณสำหรับสถานการณ์ที่ "เพิ่มภาระ" (ไม่มีอยู่ในข้อมูลผู้ใช้)
+  const HOUSE_INSTALLMENT = 12000
+  const CAR_INSTALLMENT = 8000
 
   if (q.includes('กาแฟ') || q.includes('coffee')) {
     monthlyEffect = coffee
     label = 'เลิกซื้อกาแฟ'
+  } else if (q.includes('ทำอาหาร') || q.includes('กินข้าวบ้าน') || q.includes('eat at home') || q.includes('cook')) {
+    monthlyEffect = Math.round(food * 0.4)
+    label = 'ทำอาหารกินเอง'
+  } else if (q.includes('ลงทุน') || q.includes('invest')) {
+    monthlyEffect = Math.max(2000, Math.round(surplus * 0.5))
+    label = 'ลงทุนทุกเดือน'
+  } else if (q.includes('บ้าน') || q.includes('house')) {
+    // ผ่อนบ้านแทนค่าเช่าปัจจุบัน -> ส่วนต่างคือภาระที่เพิ่มขึ้น
+    monthlyEffect = -Math.max(0, HOUSE_INSTALLMENT - Math.round(housing))
+    label = 'ซื้อบ้าน'
+  } else if (q.includes('รถ') || q.includes('car')) {
+    monthlyEffect = -CAR_INSTALLMENT
+    label = 'ซื้อรถใหม่'
   } else if (q.includes('ช้อป') || q.includes('shopping')) {
     monthlyEffect = Math.round(shopping * 0.5)
     label = 'ลดช้อปปิ้งลงครึ่งหนึ่ง'
@@ -433,18 +453,37 @@ export async function aiWhatIf({ question }) {
     const pct = pctMatch ? Number(pctMatch[1]) : 10
     monthlyEffect = Math.round((BASE_SALARY * pct) / 100)
     label = `เงินเดือนขึ้น ${pct}%`
+  } else if (q.includes('save') || q.includes('ออม') || q.includes('เก็บเงิน')) {
+    const pctMatch = q.match(/(\d+)\s*%/)
+    const amountMatch = q.match(/([0-9][0-9,]{2,})/)
+    if (pctMatch) {
+      monthlyEffect = Math.round((avg.income * Number(pctMatch[1])) / 100)
+      label = `ออม ${pctMatch[1]}% ของรายรับ`
+    } else if (amountMatch) {
+      monthlyEffect = Number(amountMatch[1].replace(/,/g, ''))
+      label = `ออมเดือนละ ${monthlyEffect.toLocaleString()} บาท`
+    } else {
+      monthlyEffect = Math.round(avg.income * 0.1)
+      label = 'ออม 10% ของรายรับ'
+    }
   } else {
     // fallback ทั่วไป: สมมติประหยัดได้ 10% ของรายจ่าย
     monthlyEffect = Math.round(avg.expense * 0.1)
     label = 'ประหยัดค่าใช้จ่าย 10%'
   }
 
+  const abs = Math.abs(monthlyEffect)
+  const isCost = monthlyEffect < 0
+
   return {
     label,
+    direction: isCost ? 'cost' : 'save',
     monthly: monthlyEffect,
     yearly: monthlyEffect * 12,
     fiveYear: monthlyEffect * 12 * 5,
-    insight_th: `ถ้า${label} จะช่วยให้มีเงินเพิ่มขึ้นเดือนละ ${monthlyEffect.toLocaleString()} บาท คิดเป็น ${(monthlyEffect * 12).toLocaleString()} บาท/ปี — ลองกันเงินส่วนนี้ไปลงทุนหรือเก็บออม จะเห็นผลชัดในระยะยาว 🌱`,
+    insight_th: isCost
+      ? `ถ้า${label} จะมีภาระเพิ่มเดือนละ ${abs.toLocaleString()} บาท คิดเป็น ${(abs * 12).toLocaleString()} บาท/ปี — ตอนนี้เหลือเฉลี่ยเดือนละ ${surplus.toLocaleString()} บาท ลองเช็กว่ารองรับไหวก่อนตัดสินใจ`
+      : `ถ้า${label} จะช่วยให้มีเงินเพิ่มขึ้นเดือนละ ${abs.toLocaleString()} บาท คิดเป็น ${(abs * 12).toLocaleString()} บาท/ปี — ลองกันเงินส่วนนี้ไปลงทุนหรือเก็บออม จะเห็นผลชัดในระยะยาว`,
   }
 }
 

@@ -2,19 +2,20 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  CalendarDays, ListChecks, ChevronLeft, ChevronRight, Plus, Pencil, Trash2,
-  Sparkles, Clock, ArrowUpRight, ArrowDownRight,
+  CalendarDays, ListChecks, ChevronLeft, ChevronRight, Pencil, Trash2,
+  Clock, ArrowUpRight, ArrowDownRight,
 } from 'lucide-react'
 import { getTransactions, getCategories, deleteTransaction } from '../lib/api'
 import { FUNDING_SOURCES } from '../lib/mockData'
-import { formatMoney, formatDateLong, formatTime, currentMonthKey, todayISO } from '../lib/format'
 import {
-  Card, CategoryIcon, Badge, Button, Skeleton, EmptyState,
-} from '../components/ui'
+  formatMoney, formatMoneyShort, formatDateLong, formatTime, currentMonthKey, todayISO,
+} from '../lib/format'
+import { Card, CategoryIcon, Skeleton, EmptyState } from '../components/ui'
 import MonthPicker from '../components/MonthPicker'
 import Calendar from '../components/Calendar'
 import TransactionModal from '../components/TransactionModal'
-import QuickAdd from '../components/QuickAdd'
+import QuickAddModal from '../components/QuickAdd'
+import { Fab, FabMenu } from '../components/Fab'
 
 /** ข้อมูลแหล่งเงินของรายการ (รองรับ 'อื่นๆ' ที่ผู้ใช้พิมพ์เอง) */
 function sourceOf(tx) {
@@ -41,6 +42,8 @@ export default function Home() {
   const [month, setMonth] = useState(currentMonthKey())
   const [selectedDate, setSelectedDate] = useState(todayISO())
   const [editing, setEditing] = useState(null) // tx | 'new' | null
+  const [menuOpen, setMenuOpen] = useState(false) // เมนูของ FAB
+  const [aiOpen, setAiOpen] = useState(false) // โมดัล AI Quick Add
 
   const activeMonth = tab === 'monthly' ? month : selectedDate.slice(0, 7)
   const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getCategories })
@@ -90,22 +93,10 @@ export default function Home() {
 
   return (
     <div className="space-y-5">
-      {/* AI Quick Add — บันทึกเร็วจากหน้าแรกได้เลย */}
-      <QuickAdd
-        categories={categories}
-        defaultDate={tab === 'daily' ? selectedDate : todayISO()}
-        onAdded={invalidate}
-      />
-
-      {/* Tabs + เพิ่ม */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex rounded-full border border-hairline bg-canvas p-1">
-          <TabButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={CalendarDays} label="รายเดือน" />
-          <TabButton active={tab === 'daily'} onClick={() => setTab('daily')} icon={ListChecks} label="รายวัน" />
-        </div>
-        <Button size="sm" onClick={() => setEditing('new')}>
-          <Plus className="h-4 w-4" /> เพิ่ม
-        </Button>
+      {/* Tabs */}
+      <div className="inline-flex rounded-full border border-hairline bg-canvas p-1">
+        <TabButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={CalendarDays} label="รายเดือน" />
+        <TabButton active={tab === 'daily'} onClick={() => setTab('daily')} icon={ListChecks} label="รายวัน" />
       </div>
 
       {/* เนื้อหาแท็บ (fade-up ตอนสลับ) */}
@@ -135,6 +126,35 @@ export default function Home() {
         )}
       </div>
 
+      {/* ปุ่มลอยเพิ่มรายการ */}
+      <Fab onClick={() => setMenuOpen(true)} />
+
+      {menuOpen && (
+        <FabMenu
+          onClose={() => setMenuOpen(false)}
+          onManual={() => {
+            setMenuOpen(false)
+            setEditing('new')
+          }}
+          onAi={() => {
+            setMenuOpen(false)
+            setAiOpen(true)
+          }}
+        />
+      )}
+
+      {aiOpen && (
+        <QuickAddModal
+          categories={categories}
+          defaultDate={tab === 'daily' ? selectedDate : todayISO()}
+          onClose={() => setAiOpen(false)}
+          onSaved={() => {
+            setAiOpen(false)
+            invalidate()
+          }}
+        />
+      )}
+
       {editing && (
         <TransactionModal
           tx={editing === 'new' ? null : editing}
@@ -155,11 +175,11 @@ function TabButton({ active, onClick, icon: Icon, label }) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,transform] duration-200 ease-out active:scale-[0.97] ${
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-[background-color,color,transform] duration-200 ease-out active:scale-[0.97] sm:gap-2 sm:px-4 sm:py-2 sm:text-sm ${
         active ? 'bg-surface-card text-ink' : 'text-muted hover:bg-surface-card hover:text-ink'
       }`}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       {label}
     </button>
   )
@@ -273,13 +293,13 @@ function DailyView({ selectedDate, onDate, dayTxns, summary, isLoading, onEdit, 
 
 function SummaryTile({ label, value, icon: Icon, color, net }) {
   return (
-    <Card interactive className={`p-3 sm:p-4 ${net ? 'bg-surface' : ''}`}>
-      <div className="flex items-center gap-1.5 text-muted">
-        <Icon className="h-3.5 w-3.5" style={{ color }} />
-        <span className="text-[11px]">{label}</span>
+    <Card interactive className={`p-2.5 sm:p-4 ${net ? 'bg-surface-card' : ''}`}>
+      <div className="flex items-center gap-1 text-muted">
+        <Icon className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" style={{ color }} />
+        <span className="truncate text-[10px] sm:text-[11px]">{label}</span>
       </div>
-      <p className="mt-1.5 text-sm font-semibold tabular sm:text-base" style={{ color }}>
-        {formatMoney(value)}
+      <p className="mt-1 text-[13px] font-semibold tabular sm:text-base" style={{ color }}>
+        {formatMoneyShort(value)}
       </p>
     </Card>
   )
@@ -292,23 +312,17 @@ function DayRow({ tx, index, onEdit, onDelete }) {
 
   return (
     <li
-      className="group flex animate-fade-up items-center gap-3 px-4 py-3.5 transition-colors hover:bg-surface/60"
+      className="group flex animate-fade-up items-center gap-2.5 px-3 py-2.5 transition-colors hover:bg-surface/60 sm:gap-3 sm:px-4 sm:py-3"
       style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-ink">
-        <CategoryIcon name={tx.category?.icon} />
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-card text-ink sm:h-10 sm:w-10">
+        <CategoryIcon name={tx.category?.icon} className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="truncate font-medium text-ink">
-            {tx.description || tx.category?.name_th || 'ไม่มีรายละเอียด'}
-          </p>
-          {tx.ai_categorized && (
-            <Badge tone="ai" className="shrink-0">
-              <Sparkles className="h-3 w-3" /> AI
-            </Badge>
-          )}
-        </div>
+        {/* รายการที่ AI สร้าง แสดงผลเหมือนรายการที่กรอกเอง (ไม่มีป้าย AI) */}
+        <p className="truncate text-sm font-medium text-ink">
+          {tx.description || tx.category?.name_th || 'ไม่มีรายละเอียด'}
+        </p>
         <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted">
           <Clock className="h-3 w-3" />
           {formatTime(tx.created_at)} · {tx.category?.name_th || 'ไม่ระบุหมวด'}
@@ -324,7 +338,10 @@ function DayRow({ tx, index, onEdit, onDelete }) {
         </p>
       </div>
 
-      <span className="shrink-0 font-semibold tabular" style={{ color: isIncome ? INCOME_COLOR : '#000' }}>
+      <span
+        className="shrink-0 text-sm font-semibold tabular"
+        style={{ color: isIncome ? INCOME_COLOR : '#0a0a0a' }}
+      >
         {isIncome ? '+' : '-'}
         {formatMoney(tx.amount)}
       </span>

@@ -5,9 +5,9 @@ import {
   Plus, Target, Sparkles, Trash2, TrendingDown, Clock, CalendarDays, Coins,
 } from 'lucide-react'
 import { getGoals, addGoal, deleteGoal, aiGoalPlan } from '../lib/api'
-import { formatMoney, formatDate } from '../lib/format'
+import { formatMoney, formatMoneyShort, formatDate } from '../lib/format'
 import {
-  Button, Card, Eyebrow, Field, Input, Modal, Skeleton, EmptyState,
+  Button, Card, Field, Input, Modal, Skeleton, EmptyState,
 } from '../components/ui'
 
 export default function Goals() {
@@ -18,19 +18,15 @@ export default function Goals() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <Eyebrow>Goals</Eyebrow>
-          <h2 className="display mt-1 text-2xl text-ink">เป้าหมายการออม</h2>
-          <p className="mt-1 text-sm text-muted">ตั้งเป้าและให้ AI ช่วยวางแผนให้ถึงเป้าหมาย</p>
-        </div>
-        <Button onClick={() => setAdding(true)}>
+      {/* ไม่แสดงชื่อหน้าตามดีไซน์ใหม่ */}
+      <div className="flex items-center justify-end">
+        <Button size="sm" onClick={() => setAdding(true)}>
           <Plus className="h-4 w-4" /> เพิ่มเป้าหมาย
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5">
           {Array.from({ length: 2 }).map((_, i) => (
             <Skeleton key={i} className="h-64 rounded-3xl" />
           ))}
@@ -48,7 +44,7 @@ export default function Goals() {
           />
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5">
           {goals.map((g) => (
             <GoalCard key={g.id} goal={g} onChanged={invalidate} />
           ))}
@@ -80,16 +76,18 @@ function GoalCard({ goal, onChanged }) {
   const plan = goal.ai_plan
 
   return (
-    <Card interactive className="flex flex-col p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lavender text-ink">
-            <Target className="h-5 w-5" />
+    <Card interactive className="flex flex-col p-3 sm:p-5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-lavender text-ink sm:h-10 sm:w-10">
+            <Target className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
-          <div>
-            <h3 className="font-semibold text-ink">{goal.name}</h3>
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold text-ink sm:text-base">{goal.name}</h3>
             {goal.target_date && (
-              <p className="text-xs text-muted">ถึงกำหนด {formatDate(goal.target_date)}</p>
+              <p className="truncate text-[10px] text-muted sm:text-xs">
+                ถึงกำหนด {formatDate(goal.target_date)}
+              </p>
             )}
           </div>
         </div>
@@ -123,38 +121,41 @@ function GoalCard({ goal, onChanged }) {
       </div>
 
       {/* Progress */}
-      <div className="mt-5">
-        <div className="mb-1.5 flex items-baseline justify-between text-sm">
-          <span className="font-semibold tabular text-ink">{formatMoney(goal.saved_amount)}</span>
-          <span className="text-muted tabular">/ {formatMoney(goal.target_amount)}</span>
+      <div className="mt-3 sm:mt-5">
+        <div className="mb-1.5 flex items-baseline justify-between gap-1 text-xs sm:text-sm">
+          <span className="truncate font-semibold tabular text-ink">{formatMoneyShort(goal.saved_amount)}</span>
+          <span className="shrink-0 text-muted tabular">/ {formatMoneyShort(goal.target_amount)}</span>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-hairline-soft">
+        <div className="h-2 overflow-hidden rounded-full bg-hairline-soft sm:h-2.5">
           <div className="h-full rounded-full bg-ink transition-all" style={{ width: `${pct}%` }} />
         </div>
-        <p className="mt-1.5 text-xs text-muted">
-          ออมแล้ว {pct}% · เหลืออีก {formatMoney(goal.target_amount - goal.saved_amount)}
+        <p className="mt-1.5 text-[10px] text-muted sm:text-xs">
+          ออมแล้ว {pct}% · เหลือ {formatMoneyShort(goal.target_amount - goal.saved_amount)}
         </p>
       </div>
 
       {/* AI plan */}
-      <div className="mt-5 border-t border-hairline-soft pt-5">
+      <div className="mt-3 border-t border-hairline-soft pt-3 sm:mt-5 sm:pt-5">
         {!plan ? (
           <Button
-            variant="secondary"
+            variant="ai"
+            size="sm"
             className="w-full"
             onClick={() => planMutation.mutate()}
             loading={planMutation.isPending}
           >
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-3.5 w-3.5" />
             {planMutation.isPending ? 'AI กำลังวางแผน...' : 'ให้ AI วางแผนออม'}
           </Button>
         ) : (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              <p className="eyebrow">AI Plan</p>
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="ai-gradient flex h-5 w-5 items-center justify-center rounded-full text-white">
+                <Sparkles className="h-3 w-3" />
+              </span>
+              <p className="ai-gradient-text text-[11px] font-semibold uppercase tracking-wider">AI Plan</p>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <PlanStat icon={Coins} label="ต้องออม/เดือน" value={formatMoney(plan.required_monthly)} />
               <PlanStat icon={CalendarDays} label="เหลือเวลา" value={`${plan.months_left} เดือน`} />
               <PlanStat icon={TrendingDown} label="เงินเหลือปัจจุบัน" value={formatMoney(plan.current_surplus)} />
@@ -162,23 +163,26 @@ function GoalCard({ goal, onChanged }) {
             </div>
 
             {plan.cut_suggestions?.length > 0 && (
-              <div className="rounded-2xl bg-surface p-3">
-                <p className="mb-2 text-xs font-medium text-muted">แนะนำให้ลดค่าใช้จ่าย</p>
-                <ul className="space-y-1.5">
+              <div className="rounded-xl bg-surface p-2.5">
+                <p className="mb-1.5 text-[10px] font-medium text-muted sm:text-xs">แนะนำให้ลดค่าใช้จ่าย</p>
+                <ul className="space-y-1">
                   {plan.cut_suggestions.map((c) => (
-                    <li key={c.category} className="flex items-center justify-between text-sm">
-                      <span className="text-ink">{c.category}</span>
-                      <span className="tabular text-ink">ลด {formatMoney(c.suggested_cut)}</span>
+                    <li key={c.category} className="flex items-center justify-between gap-1 text-[11px] sm:text-sm">
+                      <span className="truncate text-ink">{c.category}</span>
+                      <span className="shrink-0 tabular text-ink">ลด {formatMoneyShort(c.suggested_cut)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            <p className="rounded-2xl bg-lavender p-4 text-sm leading-relaxed text-ink">{plan.advice_th}</p>
+            {/* คำแนะนำจาก AI — ใช้ธีม gradient ของ AI */}
+            <p className="ai-gradient rounded-xl p-3 text-[11px] leading-relaxed text-white sm:text-sm">
+              {plan.advice_th}
+            </p>
             <button
               onClick={() => planMutation.mutate()}
-              className="text-xs font-medium text-ink underline underline-offset-2 hover:text-muted"
+              className="text-[10px] font-medium text-muted underline underline-offset-2 hover:text-ink sm:text-xs"
             >
               วางแผนใหม่อีกครั้ง
             </button>
@@ -191,12 +195,12 @@ function GoalCard({ goal, onChanged }) {
 
 function PlanStat({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-2xl border border-hairline p-3">
-      <div className="flex items-center gap-1.5 text-muted">
-        <Icon className="h-3.5 w-3.5" />
-        <span className="text-[11px]">{label}</span>
+    <div className="rounded-xl border border-hairline p-2">
+      <div className="flex items-center gap-1 text-muted">
+        <Icon className="h-3 w-3 shrink-0" />
+        <span className="truncate text-[10px]">{label}</span>
       </div>
-      <p className="mt-0.5 text-sm font-semibold tabular text-ink">{value}</p>
+      <p className="mt-0.5 truncate text-[11px] font-semibold tabular text-ink sm:text-sm">{value}</p>
     </div>
   )
 }

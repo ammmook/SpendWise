@@ -19,6 +19,13 @@ export function formatMoney(amount, opts = {}) {
   return base
 }
 
+const currencyFmt0 = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 })
+
+/** จำนวนเงินแบบไม่มีทศนิยม เช่น "34,845 ฿" — ใช้กับการ์ดสรุปให้พอดีจอมือถือ */
+export function formatMoneyShort(amount) {
+  return `${currencyFmt0.format(Math.round(Number(amount) || 0))} ฿`
+}
+
 /** แปลงจำนวนเงินแบบไม่มีสัญลักษณ์สกุลเงิน (สำหรับใส่ในฟอร์ม/แกนกราฟ) */
 export function formatNumber(amount) {
   return currencyFmt.format(Number(amount) || 0)

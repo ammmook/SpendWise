@@ -47,12 +47,14 @@ export function Button({
     onColor: 'bg-canvas text-ink hover:bg-surface-card',
     ghost: 'text-ink hover:bg-surface-card',
     danger: 'bg-canvas text-expense border border-expense/25 hover:bg-expense/10',
+    ai: 'ai-gradient text-white hover:opacity-90', // เฉพาะฟีเจอร์ AI
   }
+  // ขนาดกระชับบนมือถือ แล้วขยายที่ sm ขึ้นไป
   const sizes = {
-    sm: 'h-9 px-4 text-sm',
-    md: 'h-11 px-5 text-sm',
-    lg: 'h-12 px-6 text-base',
-    icon: 'h-10 w-10',
+    sm: 'h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm',
+    md: 'h-10 px-4 text-sm sm:h-11 sm:px-5',
+    lg: 'h-11 px-5 text-sm sm:h-12 sm:px-6 sm:text-base',
+    icon: 'h-9 w-9 sm:h-10 sm:w-10',
   }
   return (
     <button
@@ -144,7 +146,7 @@ export function Badge({ children, tone = 'neutral', className = '' }) {
     neutral: 'bg-surface-card text-ink',
     income: 'bg-mint text-ink',
     expense: 'bg-peach text-ink',
-    ai: 'bg-lavender text-ink',
+    ai: 'ai-gradient text-white', // เฉพาะฟีเจอร์ AI
   }
   return (
     <span
@@ -184,8 +186,8 @@ export function EmptyState({ title, description, action }) {
   )
 }
 
-/** Modal — ปิดด้วย ESC / คลิกฉากหลัง (modal เป็นระดับเดียวที่มีเงาได้) */
-export function Modal({ open, onClose, title, children, footer }) {
+/** Modal — ปิดด้วย ESC / คลิกฉากหลัง; tone="ai" = หัวโมดัลใช้ gradient ของ AI */
+export function Modal({ open, onClose, title, children, footer, tone }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose?.()
@@ -210,20 +212,34 @@ export function Modal({ open, onClose, title, children, footer }) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="animate-scale-in relative z-10 w-full max-w-md rounded-t-2xl border border-hairline bg-canvas p-6 shadow-2xl sm:rounded-2xl"
+        className="animate-scale-in relative z-10 w-full max-w-md overflow-hidden rounded-t-2xl border border-hairline bg-canvas shadow-2xl sm:rounded-2xl"
       >
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="display text-xl text-ink">{title}</h2>
+        <div
+          className={cx(
+            'flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5',
+            tone === 'ai' ? 'ai-gradient text-white' : 'border-b border-hairline-soft',
+          )}
+        >
+          <h2 className={cx('font-semibold', tone === 'ai' ? 'text-base' : 'display text-lg text-ink')}>
+            {title}
+          </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-muted hover:bg-surface-card hover:text-ink"
+            className={cx(
+              'rounded-lg p-1.5 transition-colors',
+              tone === 'ai'
+                ? 'text-white/80 hover:bg-white/20 hover:text-white'
+                : 'text-muted hover:bg-surface-card hover:text-ink',
+            )}
             aria-label="ปิด"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        {children}
-        {footer && <div className="mt-6 flex gap-3">{footer}</div>}
+        <div className="p-4 sm:p-5">
+          {children}
+          {footer && <div className="mt-5 flex gap-2.5">{footer}</div>}
+        </div>
       </div>
     </div>,
     document.body,

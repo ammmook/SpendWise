@@ -12,7 +12,9 @@ import {
   ChevronLeft, ChevronRight, Receipt,
 } from 'lucide-react'
 import { getDashboardSummary, getYearlySummary } from '../lib/api'
-import { formatMoney, formatMonthShort, formatMonthLabel, currentMonthKey } from '../lib/format'
+import {
+  formatMoney, formatMoneyShort, formatMonthShort, formatMonthLabel, currentMonthKey,
+} from '../lib/format'
 import { Card, ColorBlock, Eyebrow, Skeleton, EmptyState } from '../components/ui'
 import MonthPicker from '../components/MonthPicker'
 
@@ -79,17 +81,23 @@ function YearPicker({ value, onChange }) {
   )
 }
 
-/** การ์ดสรุปแบบ feature-card สีจัด */
+/** การ์ดสรุปแบบ feature-card สีจัด — กระชับพอให้เรียง 3 ใบต่อแถวบนมือถือ */
 function StatBlock({ tone, label, main, icon: Icon, hint }) {
   const dark = tone === 'teal' || tone === 'pink' || tone === 'coral'
   return (
-    <ColorBlock tone={tone} interactive className="p-5">
-      <div className="flex items-center justify-between">
-        <p className={`eyebrow ${dark ? '!text-white/70' : '!text-ink/55'}`}>{label}</p>
-        <Icon className={`h-4 w-4 ${dark ? 'text-white/70' : 'text-ink/50'}`} />
+    <ColorBlock tone={tone} interactive className="p-3 sm:p-5">
+      <div className="flex items-center justify-between gap-1">
+        <p className={`eyebrow truncate !text-[10px] sm:!text-[12px] ${dark ? '!text-white/70' : '!text-ink/55'}`}>
+          {label}
+        </p>
+        <Icon className={`h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4 ${dark ? 'text-white/70' : 'text-ink/50'}`} />
       </div>
-      <p className="mt-4 text-2xl font-semibold tracking-tight tabular">{main}</p>
-      {hint && <p className={`mt-1 text-xs ${dark ? 'text-white/60' : 'text-ink/55'}`}>{hint}</p>}
+      <p className="mt-2 text-sm font-semibold tracking-tight tabular sm:mt-4 sm:text-2xl">{main}</p>
+      {hint && (
+        <p className={`mt-0.5 truncate text-[10px] sm:mt-1 sm:text-xs ${dark ? 'text-white/60' : 'text-ink/55'}`}>
+          {hint}
+        </p>
+      )}
     </ColorBlock>
   )
 }
@@ -97,16 +105,16 @@ function StatBlock({ tone, label, main, icon: Icon, hint }) {
 /** การ์ด hairline พร้อมไอคอนสี */
 function PlainStat({ label, main, icon: Icon, accent, hint }) {
   return (
-    <Card interactive className="p-5">
+    <Card interactive className="p-3 sm:p-5">
       <span
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-card"
+        className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-card sm:h-9 sm:w-9"
         style={{ color: accent }}
       >
-        <Icon className="h-5 w-5" strokeWidth={1.9} />
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.9} />
       </span>
-      <p className="eyebrow mt-3">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight tabular text-ink">{main}</p>
-      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
+      <p className="eyebrow mt-2 truncate !text-[10px] sm:mt-3 sm:!text-[12px]">{label}</p>
+      <p className="mt-1 text-sm font-semibold tracking-tight tabular text-ink sm:text-2xl">{main}</p>
+      {hint && <p className="mt-0.5 truncate text-[10px] text-muted sm:mt-1 sm:text-xs">{hint}</p>}
     </Card>
   )
 }
@@ -138,31 +146,28 @@ function SavingsSummary({ savings, periodLabel }) {
   return (
     <section className="space-y-4">
       <SectionTitle eyebrow="Savings" title="สรุปเงินออม" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <PlainStat
           label="ออมเข้า"
-          main={formatMoney(savings.saved)}
+          main={formatMoneyShort(savings.saved)}
           icon={PiggyBank}
           accent={INCOME_COLOR}
           hint={periodLabel}
         />
         <PlainStat
-          label="ถอนจากเงินออม"
-          main={formatMoney(savings.withdrawn)}
+          label="ถอนออม"
+          main={formatMoneyShort(savings.withdrawn)}
           icon={ArrowUpFromLine}
           accent={EXPENSE_COLOR}
           hint={periodLabel}
         />
-        <ColorBlock tone="ochre" interactive className="p-5">
-          <div className="flex items-center justify-between">
-            <p className="eyebrow !text-ink/60">เงินออมคงเหลือ</p>
-            <Landmark className="h-4 w-4 text-ink/50" />
-          </div>
-          <p className="mt-4 text-2xl font-semibold tracking-tight tabular">
-            {formatMoney(savings.remaining)}
-          </p>
-          <p className="mt-1 text-xs text-ink/55">ยอดสะสมถึงสิ้นงวด</p>
-        </ColorBlock>
+        <StatBlock
+          tone="ochre"
+          label="คงเหลือ"
+          main={formatMoneyShort(savings.remaining)}
+          icon={Landmark}
+          hint="ยอดสะสม"
+        />
       </div>
     </section>
   )
@@ -171,12 +176,12 @@ function SavingsSummary({ savings, periodLabel }) {
 function AnalyticsSkeleton() {
   return (
     <div className="space-y-7">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-32 rounded-3xl" />
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-32 rounded-2xl" />
         ))}
@@ -214,22 +219,17 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header + tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Eyebrow>Analytics</Eyebrow>
-          <h2 className="display mt-1 text-2xl text-ink">วิเคราะห์การเงิน</h2>
+      {/* แท็บ + ตัวเลือกช่วงเวลา (ไม่แสดงชื่อหน้าตามดีไซน์ใหม่) */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex rounded-full border border-hairline bg-canvas p-1">
+          <TabButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={CalendarDays} label="รายเดือน" />
+          <TabButton active={tab === 'yearly'} onClick={() => setTab('yearly')} icon={LineChartIcon} label="รายปี" />
         </div>
         {tab === 'monthly' ? (
           <MonthPicker value={month} onChange={setMonth} />
         ) : (
           <YearPicker value={year} onChange={setYear} />
         )}
-      </div>
-
-      <div className="inline-flex rounded-full border border-hairline bg-canvas p-1">
-        <TabButton active={tab === 'monthly'} onClick={() => setTab('monthly')} icon={CalendarDays} label="รายเดือน" />
-        <TabButton active={tab === 'yearly'} onClick={() => setTab('yearly')} icon={LineChartIcon} label="รายปี" />
       </div>
 
       {loading ? (
@@ -239,13 +239,13 @@ export default function Dashboard() {
           {/* Income vs Expense */}
           <section className="space-y-4">
             <SectionTitle eyebrow="This Month" title={formatMonthLabel(month)} />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <StatBlock tone="mint" label="รายรับ" main={formatMoney(monthly.income)} icon={TrendingUp} />
-              <StatBlock tone="pink" label="รายจ่าย" main={formatMoney(monthly.expense)} icon={TrendingDown} />
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <StatBlock tone="mint" label="รายรับ" main={formatMoneyShort(monthly.income)} icon={TrendingUp} />
+              <StatBlock tone="pink" label="รายจ่าย" main={formatMoneyShort(monthly.expense)} icon={TrendingDown} />
               <StatBlock
                 tone="teal"
                 label="คงเหลือ"
-                main={formatMoney(monthly.balance)}
+                main={formatMoneyShort(monthly.balance)}
                 icon={Wallet}
                 hint={`${monthly.tx_count} รายการ`}
               />
@@ -344,10 +344,10 @@ export default function Dashboard() {
           {/* Year totals */}
           <section className="space-y-4">
             <SectionTitle eyebrow="This Year" title={`ภาพรวมปี ${year + 543}`} />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <StatBlock tone="mint" label="รายรับทั้งปี" main={formatMoney(yearly.income)} icon={TrendingUp} />
-              <StatBlock tone="pink" label="รายจ่ายทั้งปี" main={formatMoney(yearly.expense)} icon={TrendingDown} />
-              <StatBlock tone="teal" label="คงเหลือทั้งปี" main={formatMoney(yearly.balance)} icon={Wallet} />
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <StatBlock tone="mint" label="รายรับทั้งปี" main={formatMoneyShort(yearly.income)} icon={TrendingUp} />
+              <StatBlock tone="pink" label="รายจ่ายทั้งปี" main={formatMoneyShort(yearly.expense)} icon={TrendingDown} />
+              <StatBlock tone="teal" label="คงเหลือทั้งปี" main={formatMoneyShort(yearly.balance)} icon={Wallet} />
             </div>
           </section>
 
