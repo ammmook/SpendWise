@@ -1,7 +1,24 @@
 // Routing + guard การเข้าถึงหน้า (ต้อง login ก่อน)
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { playTick } from './lib/sound'
 import { Spinner } from './components/ui'
+
+// เล่นเสียง "ติ้ก" เมื่อกดปุ่ม/แท็บ/ลิงก์ใดๆ (บอกว่ากดแล้ว)
+function useClickTick() {
+  useEffect(() => {
+    const onClick = (e) => {
+      const el = e.target.closest('button, a[href], [role="switch"], [role="tab"], select, summary')
+      if (!el) return
+      if (el.disabled || el.getAttribute('aria-disabled') === 'true') return
+      playTick()
+    }
+    // capture phase — ให้ทำงานแม้ handler ปลายทางจะ stopPropagation
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [])
+}
 import Layout from './components/Layout'
 import DesktopNotice from './components/DesktopNotice'
 import Login from './pages/Login'
@@ -34,6 +51,7 @@ function RedirectIfAuthed({ children }) {
 }
 
 export default function App() {
+  useClickTick()
   return (
     <BrowserRouter>
       {/* จอเดสก์ท็อป (>= 1280px) แสดงหน้าแจ้งเตือนแทนตัวแอป */}

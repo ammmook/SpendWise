@@ -36,8 +36,8 @@ function SoundSection() {
           {on ? <Volume2 className="h-[18px] w-[18px]" /> : <VolumeX className="h-[18px] w-[18px]" />}
         </span>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-ink sm:text-base">เสียงยืนยันการบันทึก</h3>
-          <p className="truncate text-xs text-muted">เล่นเสียงสั้นๆ เมื่อเพิ่มรายการสำเร็จ</p>
+          <h3 className="text-sm font-semibold text-ink sm:text-base">เสียงตอบสนอง</h3>
+          <p className="truncate text-xs text-muted">ติ้กเมื่อกดปุ่ม · ka-ching เมื่อบันทึกสำเร็จ</p>
         </div>
       </div>
       <button
