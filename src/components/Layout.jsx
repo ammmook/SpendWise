@@ -1,7 +1,7 @@
 // โครงหน้าหลัก: sidebar (desktop) + bottom nav (mobile) — สไตล์ขาว-ดำ ตาม DESIGN.md
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  Home, LayoutDashboard, Target, Sparkles, Settings, LogOut, PiggyBank,
+  Home, LayoutDashboard, Target, Sparkles, Menu, LogOut, PiggyBank,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Aurora from './Aurora'
@@ -11,7 +11,7 @@ const NAV = [
   { to: '/dashboard', label: 'วิเคราะห์', eyebrow: 'DASHBOARD', icon: LayoutDashboard },
   { to: '/goals', label: 'เป้าหมาย', eyebrow: 'GOALS', icon: Target },
   { to: '/what-if', label: 'จำลอง', eyebrow: 'SIMULATION', icon: Sparkles },
-  { to: '/settings', label: 'ตั้งค่า', eyebrow: 'SETTINGS', icon: Settings },
+  { to: '/settings', label: 'เมนู', eyebrow: 'MENU', icon: Menu },
 ]
 
 function Brand() {

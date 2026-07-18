@@ -27,6 +27,8 @@ import Dashboard from './pages/Dashboard'
 import Goals from './pages/Goals'
 import WhatIf from './pages/WhatIf'
 import Settings from './pages/Settings'
+import SalarySettings from './pages/SalarySettings'
+import CategorySettings from './pages/CategorySettings'
 
 function FullScreenLoader() {
   return (
@@ -78,6 +80,8 @@ export default function App() {
             <Route path="/goals" element={<Goals />} />
             <Route path="/what-if" element={<WhatIf />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/salary" element={<SalarySettings />} />
+            <Route path="/settings/categories" element={<CategorySettings />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

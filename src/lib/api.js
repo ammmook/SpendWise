@@ -7,6 +7,7 @@ import {
   GOALS,
   PROFILE,
   BASE_SALARY,
+  LINKED_SALARY,
   todayISO,
 } from './mockData'
 import { currentMonthKey, shiftMonth } from './format'
@@ -75,6 +76,63 @@ export async function updateMe(patch) {
   await delay()
   db.profile = { ...db.profile, ...patch }
   return clone(db.profile)
+}
+
+// เชื่อมข้อมูลเงินเดือนจากบัญชีเว็บเดิม (mock) — ดึงเงินเดือน + เปิดบันทึกอัตโนมัติ
+export async function linkSalaryAccount() {
+  await delay(600)
+  db.profile = {
+    ...db.profile,
+    salary_synced: true,
+    salary_auto: true,
+    base_salary: LINKED_SALARY,
+  }
+  ensureSalaryThisMonth()
+  return clone(db.profile)
+}
+
+export async function unlinkSalaryAccount() {
+  await delay()
+  db.profile = { ...db.profile, salary_synced: false }
+  return clone(db.profile)
+}
+
+// ตั้งค่าเงินเดือนเอง + เลือกวันที่เงินเข้า/เปิดบันทึกอัตโนมัติ
+export async function updateSalarySettings({ base_salary, salary_day, salary_auto }) {
+  await delay()
+  db.profile = {
+    ...db.profile,
+    base_salary: Number(base_salary) || 0,
+    salary_day: Math.min(28, Math.max(1, Number(salary_day) || 1)),
+    salary_auto: !!salary_auto,
+  }
+  if (db.profile.salary_auto) ensureSalaryThisMonth()
+  return clone(db.profile)
+}
+
+// บันทึกเงินเดือนของเดือนปัจจุบันถ้ายังไม่มี (idempotent — กันซ้ำต่อเดือน)
+function ensureSalaryThisMonth() {
+  const m = currentMonthKey()
+  const exists = db.transactions.some(
+    (t) => t.type === 'income' && t.source === 'salary_sync' && monthOf(t.transaction_date) === m,
+  )
+  if (exists || !(db.profile.base_salary > 0)) return
+  const salaryCat = db.categories.find((c) => c.name === 'Salary')
+  const [y, mm] = m.split('-').map(Number)
+  const dim = new Date(y, mm, 0).getDate()
+  const day = Math.min(db.profile.salary_day || 1, dim)
+  db.transactions.unshift({
+    id: newId(),
+    category_id: salaryCat?.id || null,
+    type: 'income',
+    amount: db.profile.base_salary,
+    description: 'เงินเดือน',
+    transaction_date: `${m}-${String(day).padStart(2, '0')}`,
+    created_at: new Date().toISOString(),
+    funding_source: 'salary',
+    source: 'salary_sync',
+    ai_categorized: false,
+  })
 }
 
 // ---------------- Categories ----------------

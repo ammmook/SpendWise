@@ -172,6 +172,12 @@ export const PROFILE = {
   display_name: 'คุณรุ่งทิพย์',
   base_salary: BASE_SALARY,
   currency: 'THB',
+  salary_synced: false, // เชื่อมข้อมูลเงินเดือนจากเว็บเดิมแล้วหรือยัง
+  salary_auto: false, // ให้ระบบบันทึกเงินเดือนอัตโนมัติทุกเดือน
+  salary_day: 1, // เงินเข้าทุกวันที่ (1-28)
 }
+
+// เงินเดือนที่ "ดึงมา" ตอนเชื่อมกับบัญชีเว็บเดิม (mock)
+export const LINKED_SALARY = 35000
 
 export { todayISO }
