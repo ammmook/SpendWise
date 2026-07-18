@@ -50,8 +50,8 @@ export default function Calendar({ month, dailyTotals, selectedDate, onSelectDat
                 isSelected
                   ? 'border-ink bg-ink text-canvas'
                   : isToday
-                    ? 'border-ink/30 bg-surface'
-                    : 'border-hairline bg-canvas hover:border-ink/20 hover:bg-surface'
+                    ? 'border-ink/30 bg-surface-card'
+                    : 'border-hairline bg-canvas hover:border-ink/20 hover:bg-surface-card'
               }`}
             >
               <span

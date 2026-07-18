@@ -60,6 +60,25 @@ export function formatMonthShort(monthKey) {
   return `${monthNamesTh[m - 1]} ${String((y + 543) % 100).padStart(2, '0')}`
 }
 
+/** ตัวย่อเดือนอย่างเดียว (ไม่มีปี) "2026-07" -> "ก.ค." */
+export function formatMonthAbbr(monthKey) {
+  const m = Number(monthKey.split('-')[1])
+  return monthNamesTh[m - 1]
+}
+
+/** ช่วงสัปดาห์รูปแบบ "dd - dd mmm yyyy" (ยุบเดือน/ปีที่ซ้ำ) */
+export function formatWeekRange(startISO, endISO) {
+  const s = new Date(`${startISO}T00:00:00`)
+  const e = new Date(`${endISO}T00:00:00`)
+  const sY = s.getFullYear() + 543
+  const eY = e.getFullYear() + 543
+  const sM = monthNamesTh[s.getMonth()]
+  const eM = monthNamesTh[e.getMonth()]
+  if (sY !== eY) return `${s.getDate()} ${sM} ${sY} - ${e.getDate()} ${eM} ${eY}`
+  if (s.getMonth() !== e.getMonth()) return `${s.getDate()} ${sM} - ${e.getDate()} ${eM} ${eY}`
+  return `${s.getDate()} - ${e.getDate()} ${eM} ${eY}`
+}
+
 /** คืน key เดือนปัจจุบันในรูปแบบ "YYYY-MM" */
 export function currentMonthKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`

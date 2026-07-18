@@ -156,7 +156,7 @@ export default function Login() {
             </button>
           </p>
 
-          <p className="mt-6 flex items-center justify-center gap-1.5 rounded-lg bg-surface px-3 py-2 text-center text-xs text-muted">
+          <p className="mt-6 flex items-center justify-center gap-1.5 rounded-lg bg-surface-card px-3 py-2 text-center text-xs text-muted">
             <Check className="h-3.5 w-3.5 text-income" />
             เดโม (Phase 1): กรอกอีเมลและรหัสผ่านใดก็ได้เพื่อเข้าใช้งาน
           </p>

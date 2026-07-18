@@ -227,7 +227,7 @@ function CategoriesSection() {
             {defaults.map((c) => (
               <li
                 key={c.id}
-                className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-sm text-ink"
+                className="inline-flex items-center gap-1.5 rounded-full bg-surface-card px-3 py-1 text-sm text-ink"
               >
                 <CategoryIcon name={c.icon} className="h-3.5 w-3.5" />
                 {c.name_th}

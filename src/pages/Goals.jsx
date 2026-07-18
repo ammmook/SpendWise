@@ -163,7 +163,7 @@ function GoalCard({ goal, onChanged }) {
             </div>
 
             {plan.cut_suggestions?.length > 0 && (
-              <div className="rounded-xl bg-surface p-2.5">
+              <div className="rounded-xl bg-surface-card p-2.5">
                 <p className="mb-1.5 text-[10px] font-medium text-muted sm:text-xs">แนะนำให้ลดค่าใช้จ่าย</p>
                 <ul className="space-y-1">
                   {plan.cut_suggestions.map((c) => (

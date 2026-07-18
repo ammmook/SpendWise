@@ -277,6 +277,115 @@ export async function getYearlySummary({ year } = {}) {
   }
 }
 
+// ---------------- Analytics (week / month / year) ----------------
+function sumType(rows, type) {
+  return rows.filter((t) => t.type === type).reduce((s, t) => s + t.amount, 0)
+}
+
+function breakdownByCategory(rows, type) {
+  const map = new Map()
+  for (const t of rows) {
+    if (t.type !== type) continue
+    const cat = catById(t.category_id)
+    const key = cat?.id || 'none'
+    const cur = map.get(key) || {
+      category_id: key,
+      name_th: cat?.name_th || 'ไม่ระบุ',
+      icon: cat?.icon || 'Tag',
+      total: 0,
+    }
+    cur.total += t.amount
+    map.set(key, cur)
+  }
+  return [...map.values()].sort((a, b) => b.total - a.total)
+}
+
+/**
+ * สรุปข้อมูลสำหรับหน้าวิเคราะห์
+ * @param {{ period:'week'|'month'|'year', anchor?:string|number }} opts
+ *  - week: anchor = วันที่ ISO ในสัปดาห์นั้น (default วันนี้)
+ *  - month: anchor = 'YYYY-MM' (default เดือนปัจจุบัน)
+ *  - year: anchor = ปี ค.ศ. (default ปีปัจจุบัน)
+ */
+export async function getAnalytics({ period = 'month', anchor } = {}) {
+  await delay(320)
+  const now = new Date()
+  let rows = []
+  let flow = [] // { key, income, expense } ต่อหน่วยย่อยของช่วง (สำหรับกราฟแท่งเงินเข้าออก)
+  let savingsFlow = [] // { key, saved, withdrawn } (รายปี)
+  let trend6 = null // แนวโน้ม 6 เดือน (เฉพาะ month)
+  let trend6savings = null
+  let endISO = ''
+
+  if (period === 'week') {
+    const base = anchor ? new Date(`${anchor}T00:00:00`) : now
+    const start = new Date(base)
+    start.setDate(base.getDate() - base.getDay()) // ย้อนไปวันอาทิตย์
+    const days = []
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start)
+      d.setDate(start.getDate() + i)
+      days.push(todayISO(d))
+    }
+    endISO = days[6]
+    rows = db.transactions.filter((t) => t.transaction_date >= days[0] && t.transaction_date <= endISO)
+    flow = days.map((d) => {
+      const r = rows.filter((t) => t.transaction_date === d)
+      return { key: d, income: sumType(r, 'income'), expense: sumType(r, 'expense') }
+    })
+  } else if (period === 'year') {
+    const y = anchor || now.getFullYear()
+    for (let m = 1; m <= 12; m++) {
+      const key = `${y}-${String(m).padStart(2, '0')}`
+      const r = db.transactions.filter((t) => monthOf(t.transaction_date) === key)
+      const sv = sumSavings(r)
+      flow.push({ key, income: sumType(r, 'income'), expense: sumType(r, 'expense') })
+      savingsFlow.push({ key, saved: sv.saved, withdrawn: sv.withdrawn })
+    }
+    rows = db.transactions.filter((t) => monthOf(t.transaction_date).startsWith(`${y}-`))
+    endISO = `${y}-12-31`
+  } else {
+    // month
+    const m = anchor || currentMonthKey()
+    rows = db.transactions.filter((t) => monthOf(t.transaction_date) === m)
+    const [yy, mm] = m.split('-').map(Number)
+    const dim = new Date(yy, mm, 0).getDate()
+    for (let d = 1; d <= dim; d++) {
+      const dateStr = `${m}-${String(d).padStart(2, '0')}`
+      const r = rows.filter((t) => t.transaction_date === dateStr)
+      flow.push({ key: dateStr, income: sumType(r, 'income'), expense: sumType(r, 'expense') })
+    }
+    endISO = endOfMonth(m)
+    trend6 = []
+    trend6savings = []
+    for (let back = 5; back >= 0; back--) {
+      const key = shiftMonth(m, -back)
+      const r = db.transactions.filter((t) => monthOf(t.transaction_date) === key)
+      const sv = sumSavings(r)
+      trend6.push({ month: key, income: sumType(r, 'income'), expense: sumType(r, 'expense') })
+      trend6savings.push({ month: key, saved: sv.saved, withdrawn: sv.withdrawn })
+    }
+  }
+
+  const income = sumType(rows, 'income')
+  const expense = sumType(rows, 'expense')
+  const sv = sumSavings(rows)
+
+  return clone({
+    period,
+    income,
+    expense,
+    balance: income - expense,
+    expense_breakdown: breakdownByCategory(rows, 'expense'),
+    income_breakdown: breakdownByCategory(rows, 'income'),
+    flow,
+    savings: { saved: sv.saved, withdrawn: sv.withdrawn, remaining: savingsRemainingAsOf(endISO) },
+    savings_flow: savingsFlow,
+    trend6,
+    trend6savings,
+  })
+}
+
 // ---------------- Goals ----------------
 export async function getGoals() {
   await delay()

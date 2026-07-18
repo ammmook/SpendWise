@@ -176,7 +176,7 @@ function TabButton({ active, onClick, icon: Icon, label }) {
     <button
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-[background-color,color,transform] duration-200 ease-out active:scale-[0.97] sm:gap-2 sm:px-4 sm:py-2 sm:text-sm ${
-        active ? 'bg-surface-card text-ink' : 'text-muted hover:bg-surface-card hover:text-ink'
+        active ? 'bg-surface-card text-ink' : 'text-muted hover:bg-surface-card-card hover:text-ink'
       }`}
     >
       <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -223,7 +223,7 @@ function DailyView({ selectedDate, onDate, dayTxns, summary, isLoading, onEdit, 
       <Card className="flex items-center justify-between p-2">
         <button
           onClick={() => onDate(shiftDay(selectedDate, -1))}
-          className="rounded-full p-2 text-ink transition hover:bg-surface"
+          className="rounded-full p-2 text-ink transition hover:bg-surface-card"
           aria-label="วันก่อนหน้า"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -242,7 +242,7 @@ function DailyView({ selectedDate, onDate, dayTxns, summary, isLoading, onEdit, 
         <button
           onClick={() => !isToday && onDate(shiftDay(selectedDate, 1))}
           disabled={isToday}
-          className="rounded-full p-2 text-ink transition hover:bg-surface disabled:opacity-25 disabled:hover:bg-transparent"
+          className="rounded-full p-2 text-ink transition hover:bg-surface-card disabled:opacity-25 disabled:hover:bg-transparent"
           aria-label="วันถัดไป"
         >
           <ChevronRight className="h-5 w-5" />
@@ -312,7 +312,7 @@ function DayRow({ tx, index, onEdit, onDelete }) {
 
   return (
     <li
-      className="group flex animate-fade-up items-center gap-2.5 px-3 py-2.5 transition-colors hover:bg-surface/60 sm:gap-3 sm:px-4 sm:py-3"
+      className="group flex animate-fade-up items-center gap-2.5 px-3 py-2.5 transition-colors hover:bg-surface-card/60 sm:gap-3 sm:px-4 sm:py-3"
       style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-card text-ink sm:h-10 sm:w-10">
@@ -366,7 +366,7 @@ function DayRow({ tx, index, onEdit, onDelete }) {
           <>
             <button
               onClick={onEdit}
-              className="rounded-full p-1.5 text-muted transition hover:bg-surface hover:text-ink sm:opacity-0 sm:group-hover:opacity-100"
+              className="rounded-full p-1.5 text-muted transition hover:bg-surface-card hover:text-ink sm:opacity-0 sm:group-hover:opacity-100"
               aria-label="แก้ไข"
             >
               <Pencil className="h-4 w-4" />

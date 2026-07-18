@@ -10,7 +10,7 @@ export default function MonthPicker({ value, onChange }) {
     <div className="inline-flex items-center gap-1 rounded-full border border-hairline bg-canvas p-1">
       <button
         onClick={() => onChange(shiftMonth(value, -1))}
-        className="rounded-full p-1.5 text-ink hover:bg-surface"
+        className="rounded-full p-1.5 text-ink hover:bg-surface-card"
         aria-label="เดือนก่อนหน้า"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -21,7 +21,7 @@ export default function MonthPicker({ value, onChange }) {
       <button
         onClick={() => !atCurrent && onChange(shiftMonth(value, 1))}
         disabled={atCurrent}
-        className="rounded-full p-1.5 text-ink hover:bg-surface disabled:opacity-25 disabled:hover:bg-transparent"
+        className="rounded-full p-1.5 text-ink hover:bg-surface-card disabled:opacity-25 disabled:hover:bg-transparent"
         aria-label="เดือนถัดไป"
       >
         <ChevronRight className="h-4 w-4" />

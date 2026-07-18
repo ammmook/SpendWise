@@ -13,13 +13,13 @@
   --color-muted: #6a6a6a;
   --color-muted-soft: #9a9a9a;
 
-  /* Surfaces — ครีมทั้งระบบ */
-  --color-canvas: #fffaf0; /* พื้นการ์ด/อินพุต (ครีมขาว) */
-  --color-surface: #faf5e8; /* พื้นหน้า/ฟิลล์อ่อน */
-  --color-surface-card: #f5f0e0; /* การ์ดครีม/แท็บ active/ไอคอน */
-  --color-surface-strong: #ebe6d6;
-  --color-hairline: #e5e5e5;
-  --color-hairline-soft: #f0f0f0;
+  /* Surfaces — ขาวทั้งระบบ (ฟิลล์อ่อนใช้เทากลางๆ ไม่ใช่ครีม) */
+  --color-canvas: #ffffff; /* พื้นการ์ด/อินพุต */
+  --color-surface: #ffffff; /* พื้นหน้า */
+  --color-surface-card: #f3f3f5; /* ฟิลล์อ่อน/แท็บ active/ไอคอน/ชิป */
+  --color-surface-strong: #e8e8ea;
+  --color-hairline: #e6e6e8;
+  --color-hairline-soft: #f1f1f3;
 
   /* Saturated feature-card palette (6 สีของ Clay) */
   --color-pink: #ff4d8b;

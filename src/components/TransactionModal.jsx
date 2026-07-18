@@ -61,7 +61,7 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
     >
       <form onSubmit={submit} className="space-y-4">
         {/* Type toggle — pill segmented, selected = ดำ */}
-        <div className="grid grid-cols-2 gap-1 rounded-full bg-surface p-1">
+        <div className="grid grid-cols-2 gap-1 rounded-full bg-surface-card p-1">
           {[
             { v: 'expense', label: 'รายจ่าย' },
             { v: 'income', label: 'รายรับ' },
