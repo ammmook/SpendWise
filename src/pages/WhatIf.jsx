@@ -5,8 +5,11 @@ import { Sparkles, CalendarDays, CalendarRange, TrendingUp, TrendingDown } from 
 import { aiWhatIf } from '../lib/api'
 import { formatMoney } from '../lib/format'
 
-// การ์ดลอย — ขาว ขอบบางโปร่ง เงานุ่ม กระจกบางๆ (ไม่มีพื้นสีซ้อนกัน)
-const FLOATING_CARD =
+// การ์ด prompt — พื้นหลังใสสนิท ไม่มีสี/ขอบ/เงา ให้แสง Aurora ด้านหลังทะลุมาเต็มๆ
+const FLOATING_CARD = 'relative z-10 rounded-[24px]'
+
+// การ์ดผลลัพธ์ AI — ขาว ขอบบางโปร่ง เงานุ่ม กระจกบางๆ
+const RESULT_CARD =
   'relative z-10 rounded-[24px] border border-ink/[0.06] bg-white/80 shadow-[0_8px_32px_-12px_rgb(10_10_10/0.12)] backdrop-blur-[12px]'
 
 const SUGGESTIONS = [
@@ -144,7 +147,7 @@ export default function WhatIf() {
       {/* ===== ผลลัพธ์ — เหมือน AI ตอบกลับ ===== */}
       {result && !loading && (
         <div className="animate-result-in">
-          <div className={`${FLOATING_CARD} p-5 sm:p-6`}>
+          <div className={`${RESULT_CARD} p-5 sm:p-6`}>
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-4 w-4" style={{ stroke: 'url(#sim-grad)' }} />
               <span className="ai-gradient-text text-[11px] font-semibold uppercase tracking-wider">
@@ -166,7 +169,7 @@ export default function WhatIf() {
               />
             </div>
 
-            <p className="mt-4 rounded-xl border border-ink/[0.05] bg-white/60 p-3.5 text-[13px] leading-relaxed text-body sm:text-sm">
+            <p className="mt-4 rounded-xl border border-ink/[0.05] p-3.5 text-[13px] leading-relaxed text-body sm:text-sm">
               {result.insight_th}
             </p>
 
@@ -186,8 +189,8 @@ function Metric({ icon: Icon, label, value, direction, emphasized }) {
   const color = isCost ? EXPENSE_COLOR : INCOME_COLOR
   return (
     <div
-      className={`rounded-xl border bg-white p-2.5 sm:p-3 ${
-        emphasized ? 'border-ink/15 shadow-[0_2px_10px_-4px_rgb(10_10_10/0.12)]' : 'border-ink/[0.06]'
+      className={`rounded-xl border p-2.5 sm:p-3 ${
+        emphasized ? 'border-ink/15' : 'border-ink/[0.06]'
       }`}
     >
       <div className="flex items-center gap-1 text-muted">
