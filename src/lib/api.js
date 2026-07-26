@@ -194,6 +194,14 @@ function validateTransaction({ type, amount, transaction_date }) {
   if (!transaction_date) throw new Error('กรุณาระบุวันที่')
 }
 
+/** ปรับยอดสะสมของเป้าหมาย (บวก/ลบ) — ใช้เมื่อออมเงินเข้า/ถอนออกจากเป้าหมาย */
+function applyGoalDelta(goalId, delta) {
+  if (!goalId || !delta) return
+  const g = db.goals.find((x) => x.id === goalId)
+  if (!g) return
+  g.saved_amount = Math.max(0, g.saved_amount + delta)
+}
+
 export async function addTransaction(input) {
   await delay()
   validateTransaction(input)
@@ -207,10 +215,13 @@ export async function addTransaction(input) {
     created_at: new Date().toISOString(),
     funding_source: input.funding_source || 'cash',
     funding_source_label: input.funding_source_label?.trim() || '',
+    goal_id: input.goal_id || null, // ออมเข้าเป้าหมายไหน (ถ้ามี)
     source: 'manual',
     ai_categorized: !!input.ai_categorized,
   }
   db.transactions.unshift(tx)
+  // ออมเข้าเป้าหมาย → เพิ่มยอดสะสมของเป้าหมายนั้น
+  applyGoalDelta(tx.goal_id, tx.amount)
   return { ...clone(tx), category: catById(tx.category_id) || null }
 }
 
@@ -218,14 +229,21 @@ export async function updateTransaction(id, patch) {
   await delay()
   const idx = db.transactions.findIndex((t) => t.id === id)
   if (idx === -1) throw new Error('ไม่พบรายการ')
-  const merged = { ...db.transactions[idx], ...patch, amount: Number(patch.amount ?? db.transactions[idx].amount) }
+  const prev = db.transactions[idx]
+  const merged = { ...prev, ...patch, amount: Number(patch.amount ?? prev.amount) }
   validateTransaction(merged)
+  // ปรับยอดสะสมเป้าหมาย: ถอนของเดิมออกก่อน แล้วค่อยใส่ค่าใหม่
+  applyGoalDelta(prev.goal_id, -prev.amount)
+  applyGoalDelta(merged.goal_id, merged.amount)
   db.transactions[idx] = merged
   return { ...clone(merged), category: catById(merged.category_id) || null }
 }
 
 export async function deleteTransaction(id) {
   await delay()
+  const tx = db.transactions.find((t) => t.id === id)
+  // ลบรายการออมเป้าหมาย → คืนยอดสะสมของเป้าหมายนั้น
+  if (tx) applyGoalDelta(tx.goal_id, -tx.amount)
   db.transactions = db.transactions.filter((t) => t.id !== id)
   return { ok: true }
 }

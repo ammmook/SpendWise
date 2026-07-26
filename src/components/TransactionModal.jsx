@@ -1,9 +1,10 @@
 // ฟอร์มเพิ่ม/แก้ไขรายการ — ใช้ร่วมกันระหว่างหน้า Home (Daily) และ Transactions
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { addTransaction, updateTransaction } from '../lib/api'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Target } from 'lucide-react'
+import { addTransaction, updateTransaction, getGoals } from '../lib/api'
 import { FUNDING_SOURCES } from '../lib/mockData'
-import { todayISO } from '../lib/format'
+import { todayISO, formatMoneyShort } from '../lib/format'
 import { playCashSound } from '../lib/sound'
 import { Button, Field, Input, Select, Modal, CategoryIcon } from './ui'
 
@@ -17,15 +18,27 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
     transaction_date: tx?.transaction_date || defaultDate || todayISO(),
     funding_source: tx?.funding_source || 'cash',
     funding_source_label: tx?.funding_source_label || '',
+    goal_id: tx?.goal_id || '',
   })
   const [error, setError] = useState('')
 
   const cats = categories.filter((c) => c.type === form.type)
   const activeSource = FUNDING_SOURCES.find((s) => s.id === form.funding_source)
 
+  // แสดงช่อง "ออมเข้าเป้าหมาย" เมื่อรายการเป็นการออมเงิน (หมวด "เงินออม")
+  const savingsCat = categories.find((c) => c.name === 'Savings')
+  const isSavings = !!savingsCat && form.category_id === savingsCat.id
+  const { data: goals = [] } = useQuery({ queryKey: ['goals'], queryFn: getGoals, enabled: isSavings })
+
   const mutation = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, amount: Number(form.amount), category_id: form.category_id || null }
+      const payload = {
+        ...form,
+        amount: Number(form.amount),
+        category_id: form.category_id || null,
+        // ผูกกับเป้าหมายเฉพาะรายการออมเงินเท่านั้น
+        goal_id: isSavings ? form.goal_id || null : null,
+      }
       if (isEdit) return updateTransaction(tx.id, payload)
       return addTransaction(payload)
     },
@@ -113,6 +126,28 @@ export default function TransactionModal({ tx, categories, defaultDate, onClose,
             ))}
           </Select>
         </Field>
+
+        {/* ออมเข้าเป้าหมาย — เฉพาะรายการหมวดเงินออม เพื่อให้ยอดวิ่งเข้าเป้าหมายนั้น */}
+        {isSavings && (
+          <Field label="ออมเข้าเป้าหมาย" hint="เลือกเป้าหมายเพื่อให้เงินก้อนนี้ไปเพิ่มยอดสะสม (ถอนได้โดยลบรายการ)">
+            <div className="flex items-center gap-2">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-hairline bg-lavender text-ink">
+                <Target className="h-[18px] w-[18px]" />
+              </span>
+              <Select
+                value={form.goal_id}
+                onChange={(e) => setForm((f) => ({ ...f, goal_id: e.target.value }))}
+              >
+                <option value="">— ไม่เข้าเป้าหมาย (ออมทั่วไป) —</option>
+                {goals.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name} · {formatMoneyShort(g.saved_amount)}/{formatMoneyShort(g.target_amount)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </Field>
+        )}
 
         <Field
           label={form.type === 'income' ? 'เงินเข้าที่ไหน' : 'จ่ายด้วยแหล่งเงินไหน'}

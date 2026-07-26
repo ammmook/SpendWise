@@ -56,6 +56,7 @@ export default function Home() {
     qc.invalidateQueries({ queryKey: ['transactions'] })
     qc.invalidateQueries({ queryKey: ['dashboard'] })
     qc.invalidateQueries({ queryKey: ['yearly'] })
+    qc.invalidateQueries({ queryKey: ['goals'] }) // ออมเข้าเป้าหมาย → อัปเดตยอดสะสม
   }
 
   const dailyTotals = useMemo(() => {

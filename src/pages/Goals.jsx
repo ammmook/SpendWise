@@ -1,9 +1,9 @@
 // Goals — รายการเป้าหมาย + progress + หน้าย่อยให้ AI วิเคราะห์การออมรายเป้าหมาย
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Plus, Target, Sparkles, Trash2, TrendingDown, Clock, CalendarDays, Coins,
-  ChevronLeft, RefreshCw, PiggyBank,
+  ChevronLeft, RefreshCw, Info,
 } from 'lucide-react'
 import { getGoals, addGoal, deleteGoal, aiGoalPlan } from '../lib/api'
 import { formatMoney, formatMoneyShort, formatDate } from '../lib/format'
@@ -34,21 +34,12 @@ export default function Goals() {
 
   return (
     <div className="space-y-5 animate-fade-up">
-      {/* คำอธิบายหน้า — บอกว่าเป้าหมายมีไว้ทำอะไร */}
-      <div className="flex items-start gap-3 rounded-3xl bg-lavender/60 p-4 sm:p-5">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas text-ink sm:h-10 sm:w-10">
-          <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5" />
-        </span>
-        <div className="min-w-0">
+      <div className="flex items-center justify-between gap-2">
+        {/* ไอคอน i — เล่าว่าหน้านี้มีไว้ทำอะไร (แทนคำอธิบายเดิม) */}
+        <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold text-ink sm:text-base">วางแผนการออมเงิน</h2>
-          <p className="mt-1 text-xs leading-relaxed text-muted sm:text-sm">
-            ตั้งเป้าหมายว่าอยากเก็บเงินไปเพื่ออะไร แล้วให้ AI วิเคราะห์ให้ว่าต้องออมเดือนละเท่าไหร่
-            และควรลดค่าใช้จ่ายตรงไหน เพื่อไปถึงเป้าหมายได้ตามเวลาที่ตั้งไว้
-          </p>
+          <InfoTooltip text="ตั้งเป้าหมายว่าอยากเก็บเงินไปเพื่ออะไร แล้วให้ AI วิเคราะห์ให้ว่าต้องออมเดือนละเท่าไหร่ และควรลดค่าใช้จ่ายตรงไหน เพื่อไปถึงเป้าหมายได้ตามเวลาที่ตั้งไว้" />
         </div>
-      </div>
-
-      <div className="flex items-center justify-end">
         <Button size="sm" onClick={() => setAdding(true)}>
           <Plus className="h-4 w-4" /> เพิ่มเป้าหมาย
         </Button>
@@ -88,6 +79,43 @@ export default function Goals() {
             invalidate()
           }}
         />
+      )}
+    </div>
+  )
+}
+
+// ไอคอน i พร้อม tooltip — แตะ/คลิกเพื่อเปิด, คลิกนอกกรอบเพื่อปิด (รองรับทั้งมือถือและ hover)
+function InfoTooltip({ text }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('click', onDoc)
+    return () => document.removeEventListener('click', onDoc)
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative flex">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="หน้านี้มีไว้ทำอะไร"
+        aria-expanded={open}
+        className="flex h-6 w-6 items-center justify-center rounded-full border border-hairline text-muted transition-colors hover:border-ink/20 hover:text-ink"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div
+          role="tooltip"
+          className="animate-scale-in absolute left-1/2 top-8 z-30 w-[min(17rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-2xl border border-hairline bg-canvas p-3 text-xs leading-relaxed text-muted shadow-[0_8px_32px_-12px_rgb(10_10_10/0.18)]"
+        >
+          {text}
+        </div>
       )}
     </div>
   )
